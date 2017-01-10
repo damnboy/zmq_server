@@ -1,0 +1,8 @@
+  <ul>
+    <li ng-repeat="device in $ctrl.tracker.devices">
+      <span>设备串号：{{device.serial}}</span>
+      <p>设备型号：{{device.model}}</p>
+      <p ng-click="$ctrl.onControl(device.serial)">状态： {{device.usable | status }} </p>
+      <a href="#!/phones/{{device.serial}}">控制</a>
+    </li>
+  </ul>

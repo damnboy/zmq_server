@@ -1,0 +1,213 @@
+var zmq = require("zmq");
+var messageDefines = require("../protoc/msgdef.js")
+var messageRouter = require("../protoc/msgrouter.js")
+var messageUtil = require("../protoc/msgutil.js")
+var EventEmitter = require("events").EventEmitter;
+var childProcess = require("child_process");
+var logger = require("../utils/logger.js")
+var lifecycle = require("../utils/lifecycle.js")
+var Promise = require("bluebird")
+var _ = require("lodash")
+/*
+如何创建，管理，维护Device进程列表
+
+
+当设备接入时候，注册一个Promise，该Promise在设备register之后进入resolve状态，
+resolve之后，执行进程创建
+
+
+*/
+module.exports = function(options){
+    var log = new logger.createLogger("[DEVICEMANAGER]");
+    var instances = {}
+    var tracker = new EventEmitter();
+    var deviceTracker = new EventEmitter();
+
+/*
+多增加一级的事件转发，将所有的逻辑都限定在某一作用域内
+方便处理
+ */
+    tracker.on("add", function(device){
+        var privateTracker = new EventEmitter();
+        function trackingDevice(event){
+            privateTracker.emit(event)
+        }
+        deviceTracker.on(device.id, trackingDevice)
+        console.log(deviceTracker._events)
+        
+        var proc;
+        function kill(customSignal){
+            var onExit;
+
+            //new Promise时申请的资源，在finally中释放
+            //将构造以及finally控制在一个scope内，方便引用资源的变量，不需要跨context传递
+            //方便操作
+            console.log("sending " + customSignal)
+            var promise =  new Promise(function(resolve){
+
+                onExit = function (){
+                    resolve()
+                }
+
+                proc.on("exit", onExit)//无法bind this，该函数调用绑定的context并不是promise
+                
+                proc.kill(customSignal)
+            
+            })
+
+            return promise.finally(function(){
+                proc.removeListener("exit", onExit)
+            })
+        }
+
+
+        function instance(file){
+            var onExit;
+            var onMessage;
+            var promise = new Promise(function(resolve, reject){
+                proc = childProcess.fork(file, [device.id]);
+                
+                onExit = function(code, signal){
+                    if(code === 0 || signal){
+                        resolve();
+                    }
+                    else{
+                        reject("code("+code+"),signal("+signal+") ");
+                    }
+                }
+                onMessage = function(message){
+                    if(message === "ready"){
+                        log.info("Process for device("+device.id +") is ready")
+                        //发送登录成功消息
+                    }
+                    
+                }
+
+                proc.on("exit", onExit);
+                proc.on("message", onMessage);
+
+            })
+            return promise.finally(function(){
+                proc.removeListener("exit", onExit);
+                proc.removeListener("message", onMessage);
+            })
+        }
+
+        function trackingInstance(file){
+            instance(file)
+            .then(function(resolve){
+                console.log("process terminated...")
+            })
+            .catch(function(error){
+                console.log("process unexpected terminated with error " + error +" trying to restart...")
+                trackingInstance(file)
+            })
+        }
+
+        privateTracker.on("registed", function(){            
+            trackingInstance("./device")
+        })
+
+        privateTracker.on("remove", function(){
+            log.info("removing deivce")
+            kill("SIGTERM")
+            .timeout(5000)
+            .then(function(){
+                console.log("Process killed by SIGTERM")
+            })
+            .catch(function(error){
+                console.log("SIGTERM process with error: " + error)
+                console.log("Trying to KILL process")
+                kill("SIGKILL").
+                then(function(){
+                    console.log("Process killed by SIGKILL")
+                })
+            })
+
+            deviceTracker.removeListener(device.id, trackingDevice)
+            console.log(deviceTracker._events)
+        })
+
+
+        privateTracker.on("changed", function(){
+
+        })
+
+    })
+
+    tracker.on("changed", function(device){
+        deviceTracker.emit(device.id, "changed")
+    })
+
+    tracker.on("remove", function(device){
+        deviceTracker.emit(device.id, "remove")
+    })
+
+
+    var dealer = zmq.socket("dealer");
+    dealer.connect(options.endpoints.dealer)
+
+
+    var sub = zmq.socket("sub")
+    sub.subscribe("")
+    sub.connect(options.endpoints.pub)
+
+    sub.on("message", function(deviceid, networkenvelop){
+		messageRouter()
+		.on(messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage, function(deviceid, message){
+
+		})
+        .on(messageDefines.com.example.ponytail.testjeromq.DeviceRegisteredMessage, function(deviceid, message){
+            device = _.assign({}, {id:deviceid})
+            if(message.token.length !== 0){
+                tracker.emit("add", device)//add仅做注册回调的操作
+                deviceTracker.emit(device.id, "registed")//registed触发之后才执行进程创建逻辑
+            }
+            else{
+                /*
+                var registedMessage = messageUtil.envelope(
+                    messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceRegisteredMessage,
+                    message.encodeNB())
+                dealer.send([device, registedMessage])
+                */
+            }
+
+		})
+        .on(messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage, function(deviceid, message){
+            device = _.assign({}, {id:deviceid})
+            log.info("DeviceAbsentMessage on " + device.id)
+            tracker.emit("remove",device)
+		})
+		.generalHandler(deviceid, networkenvelop)
+    })
+
+
+    lifecycle.regCleanupHandler(function(){
+        log.info("Closing sockets");
+
+        [dealer, sub].forEach(function(socket){
+            try{
+                socket.close();
+            }catch(error){
+                //TypeError: Socket is closed
+                log.error("closing socket with error: " + error)
+            }
+        })
+    })
+}
+
+/*
+转交给Device进程来处理
+		.on(messageDefines.com.example.ponytail.testjeromq.TransactionDoneMessage, function(deviceId, message){
+				console.log(message)
+				//发送AuthticatedDevice消息
+				pub.send(["AUTHMANAGER",deviceId, message])
+		})
+		.on(messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage, function(deviceId, message){
+			console.log("[DEVICE MANAGER] " + "GOT Client(" + deviceId + ")PING Message")
+			push.send([deviceId, 
+				messageUtils.reply().success(
+					messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.TestConnectionMessage,
+				new messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage("pong").encodeNB())])
+		})
+    */

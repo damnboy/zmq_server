@@ -1,0 +1,21 @@
+前端包管理器bower
+    依赖：node，npm，git
+
+    安装：npm install bower -g
+
+    配置文件：bower.json
+
+    生成文件夹：bower_components
+    创建.bowerrc文件，可手工指定bower_components的路径
+
+
+
+用法：
+    交互模式创建配置文件bower.json
+    bower init
+
+    安装前端依赖
+    bower install <package-name> 
+
+    安装前端依赖 & 向bower.json配置文件添加dependencies项
+    bower install <package-name> --save

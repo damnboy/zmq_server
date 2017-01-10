@@ -1,0 +1,121 @@
+
+package com.example.ponytail.testjeromq;
+
+option java_package = "com.example.ponytail.testjeromq";
+option java_outer_classname = "MessageDefine";
+
+message MessageTypes {
+  enum Name {
+      NetworkEnvelope           = 1;
+      TransactionDoneMessage    = 2;
+
+      TestConnectionMessage     = 100;
+      LoginMessage              = 112;
+      LogoffMessage             = 113;
+      DeviceIntroductionMessage  = 114;
+      DeviceRegisteredMessage    = 115;
+      DeviceReadyMessage         = 116;
+      DevicePresentMessage       = 117;
+      DeviceAbsentMessage        = 118;
+
+      DeviceDisplayMessage      = 120;
+      DevicePhoneMessage        = 121;
+      DeviceIdentityMessage     = 122;
+
+      ScreenControlMessage      =200;
+      ScreenFrameMessage        =201;
+  }  
+}
+
+message NetworkEnvelope{
+  required MessageTypes.Name type = 1;
+  required bytes message = 2;
+}
+
+message TransactionDoneMessage {
+  required bool success = 1;
+  required MessageTypes.Name type = 2;
+  required bytes message = 3;
+}
+
+message TestConnectionMessage {
+  required string message = 1; //PING
+}
+
+
+message DeviceIntroductionMessage {
+  required string serial = 1;
+  //required DeviceStatus status = 2;
+  //required ProviderMessage provider = 3;
+}
+
+message DeviceAbsentMessage {
+  required string serial = 1;
+}
+message DeviceRegisteredMessage {
+  required string serial = 1;
+  required string uri = 2;
+}
+
+message DevicePresentMessage {
+  required string serial = 1;
+}
+
+message DeviceReadyMessage {
+  required string serial = 1;
+  required string channel = 2;
+}
+
+message LoginMessage{
+  required string username = 1;
+  required string password = 2;
+  required string mail = 3;
+  required string option = 4;
+}
+
+message LogoffMessage{
+  required string token = 1;
+}
+
+message DeviceDisplayMessage{
+  required int32 id = 1;
+  required int32 width = 2;
+  required int32 height = 3;
+  required int32 rotation = 4;
+  required float xdpi = 5;
+  required float ydpi = 6;
+  required float fps = 7;
+  required float density = 8;
+  required bool secure = 9;
+  required string url = 10;
+  optional float size = 11;
+}
+
+message DevicePhoneMessage{
+  optional string imei = 1;
+  optional string phoneNumber = 2;
+  optional string iccid = 3;
+  optional string network = 4;
+}
+
+message DeviceIdentityMessage {
+  required string serial = 1;
+  required string platform = 2;
+  required string manufacturer = 3;
+  optional string operator = 4;
+  required string model = 5;
+  required string version = 6;
+  required string abi = 7;
+  required string sdk = 8;
+  required DeviceDisplayMessage display = 9;
+  required DevicePhoneMessage phone = 11;
+  optional string product = 12;
+}
+
+message ScreenControlMessage{
+  required bool enable = 1;
+}
+
+message ScreenFrameMessage{
+  required bytes frame = 1;
+}

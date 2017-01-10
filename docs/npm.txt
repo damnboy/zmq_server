@@ -1,0 +1,18 @@
+nodejs包管理器npm
+
+    依赖：node
+
+    配置文件：package.json
+
+    生成文件夹：node_modules
+
+
+用法：
+    交互模式创建配置文件package.json
+    npm init
+
+    安装依赖
+    npm install <package-name>
+
+    安装前端依赖 & 向package.json配置文件添加dependencies项
+    npm install <package-name> --save
