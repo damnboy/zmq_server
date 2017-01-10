@@ -1,28 +1,5 @@
 基于CentOS6的部署步骤
 
-基础依赖安装
-    #用来安装前端依赖
-    npm install bower -g   
-    #用来打包前端文件
-    npm install webpack -g
-    #用来启动web服务    
-    npm install http-server -g
-    
-        
-
-#前端服务
-bower install
-
-
-webpack
-webpack时需要注意是否存在oboe错误，如果报错，将./web/bower_components/oboe/index.js文件中的
-var oboe = require('./dist/oboe-node');替换为
-var oboe = require('./dist/oboe-browser');
-
-httpserver ./web -p 1080
-
-
-
 #后端服务
 zeromq安装
     在/etc/yum.repos.d下添加zeromq.repo文件，文件内容如下
@@ -58,4 +35,22 @@ zeromq安装
 node ./app
     
         
+#前端服务
+基础依赖安装
+    #用来安装前端依赖
+    npm install bower -g   
+    #用来打包前端文件
+    npm install webpack -g
+    #用来启动web服务    
+    npm install http-server -g
+
+安装前端依赖
+bower install
+
+webpack
+webpack时需要注意是否存在oboe错误，如果报错，将./web/bower_components/oboe/index.js文件中的
+var oboe = require('./dist/oboe-node');替换为
+var oboe = require('./dist/oboe-browser');
+
+httpserver ./web -p 1080
 
