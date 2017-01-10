@@ -1,3 +1,5 @@
+基于CentOS6的部署步骤
+
 基础依赖安装
     #用来安装前端依赖
     npm install bower -g   
