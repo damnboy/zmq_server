@@ -31,31 +31,29 @@ Note: The deployment description is based on CentOS!!!
 
 - 安装protocolbuf-dev
 
-
     wget https://forensics.cert.org/cert-forensics-tools-release-el6.rpm
     rpm -Uvh cert-forensics-tools-release*rpm
     yum --enablerepo=forensics install protobuf-devel
 
-
 成功之后查看程序安装路径 
 
     rpm -ql `rpm -qa httpd`
-    
-- 启动
 
+- 启动
 
     node ./app
 
 
 # 前端服务
 
+
 - 基础依赖安装
 
-    # 用来安装前端依赖
+    #用来安装前端依赖
     npm install bower -g   
-    # 用来打包前端文件
+    #用来打包前端文件
     npm install webpack -g
-    # 用来启动web服务    
+    #用来启动web服务    
     npm install http-server -g
 
 - 安装前端依赖
@@ -72,5 +70,7 @@ webpack时需要注意是否存在oboe错误，如果报错，将./web/bower_com
 
     var oboe = require('./dist/oboe-browser');
 
-httpserver ./web -p 1080
+然后执行
+
+    httpserver ./web -p 1080
 
