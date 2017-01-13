@@ -20,7 +20,9 @@ Note: The deployment description is based on CentOS!!!
 
 - 更新yum缓存
 
+
     yum clean & yum upgrade
+
 
 - 安装zeromq-dev
 
@@ -28,6 +30,7 @@ Note: The deployment description is based on CentOS!!!
 
 
 - 安装protocolbuf-dev
+
 
     wget https://forensics.cert.org/cert-forensics-tools-release-el6.rpm
     rpm -Uvh cert-forensics-tools-release*rpm
@@ -40,8 +43,10 @@ Note: The deployment description is based on CentOS!!!
     
 - 启动
 
+
     node ./app
-        
+
+
 # 前端服务
 
 - 基础依赖安装
