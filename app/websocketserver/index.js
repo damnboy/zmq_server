@@ -4,22 +4,20 @@ var lifecycle = require("../utils/lifecycle")
 var messageDefines = require("../protoc/msgdef.js")
 var messageRouter = require("../protoc/msgrouter.js")
 var messageUtil = require("../protoc/msgutil.js")
-
+var socketio = require("socket.io");
 /*
 创建websocket，首次连上websocket之后，获取所有在线设备信息
 */
 module.exports = function(options){
     var log = logger.createLogger("[WEBSOCKET SERVER]")
-
-
-
     var push = zmq.socket("push");
-    push.connect(options.endpoints.pull);
-
+    log.info('Pushing output to "%s"', options.endpoints.push)
+    push.connect(options.endpoints.push);
 
     var sub = zmq.socket("sub");
+    log.info('Subscribing input from "%s"', options.endpoints.sub)
     sub.subscribe("")
-    sub.connect(options.endpoints.pub)
+    sub.connect(options.endpoints.sub)
     sub.on("message", function(deviceid, networkenvelop){
         messageRouter()
         .on(messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage, function(deviceid, deviceIntroductionMessage){
@@ -85,7 +83,10 @@ module.exports = function(options){
     })
 
     var httpServer = require("http").createServer();
-    var wsServer = require("socket.io")(httpServer, {serveClient:true});
+    var wsServer = socketio.listen(httpServer, {
+          serveClient :false
+        , transports : ['websocket']
+    })
 
     //TODO 均通过PUSH发送
     wsServer.on("connection", function(socket){
@@ -103,14 +104,13 @@ module.exports = function(options){
         socket.on('key', function(){
 
         })
-        push.send()
+        //push.send()
     })
-
-    wsServer.listen(3000);
-
+    httpServer.listen(options.port)
+    log.info('Starting Websocket Server Port: ' + options.port)
     lifecycle.regCleanupHandler(function(){
         wsServer.close();
-
+        log.info('closing zmq socket');
         [push, sub].forEach(function(sock){
             try{
                 sock.close();

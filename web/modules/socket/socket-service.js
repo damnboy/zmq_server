@@ -5,7 +5,7 @@ module.exports = function SocketFactory(
 //, VersionUpdateService
 //, AppState
 ) {
-  var websocketUrl = 'http://localhost:3000';// AppState.config.websocketUrl || ''
+  var websocketUrl = 'http://localhost:7110';// AppState.config.websocketUrl || ''
 
   var socket = io(websocketUrl, {
     reconnection: false, transports: ['websocket']

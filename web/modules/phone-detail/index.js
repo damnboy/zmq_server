@@ -16,7 +16,10 @@
 */
 require('angular-route')
 angular.module('phoneDetail', [
-  'ngRoute'
+  'ngRoute',
+  require('./screen').name,
+  require('../debug').name
 ])
-//.component('phoneDetail', require('./component.js'));
-.directive('phoneDetail', require('./directive.js'))
+.component('phoneDetail', require('./component.js'));
+//.controller('phoneDetailController', require('./controller.js'))
+//.directive('phoneDetail', require('./directive.js'))

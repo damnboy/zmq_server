@@ -18,9 +18,12 @@ message MessageTypes {
       DevicePresentMessage       = 117;
       DeviceAbsentMessage        = 118;
 
+
       DeviceDisplayMessage      = 120;
       DevicePhoneMessage        = 121;
       DeviceIdentityMessage     = 122;
+      DeviceHeartbeatMessage    = 123;
+
 
       ScreenControlMessage      =200;
       ScreenFrameMessage        =201;
@@ -118,4 +121,9 @@ message ScreenControlMessage{
 
 message ScreenFrameMessage{
   required bytes frame = 1;
+}
+
+
+message DeviceHeartbeatMessage {
+  required string serial = 1;
 }

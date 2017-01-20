@@ -11,8 +11,8 @@ function Lifecycle() {
   //通过bind，绑定callback到特定对象上
   //OS级别上信号事件的触发是异步的，但由于Nodejs的单线程特性，所以这里不需要考虑同步的问题
   //唯一需要考虑的就是信号能被多次触发，
-  process.on("SIGINT", this.resCleanup.bind(this))
-  process.on("SIGTERM", this.resCleanup.bind(this))
+  process.on("SIGINT", this.resCleanup.bind(this,['SIGINT']))
+  process.on("SIGTERM", this.resCleanup.bind(this,['SIGTERM']))
 }
 
 
@@ -73,20 +73,34 @@ Lifecycle.prototype.fatal = function(fatal) {
   process.exit(1)
 }
 
-Lifecycle.prototype.resCleanup = function() {
-  log.info("Winding down for graceful exit")
+/*
+收到终止信号，并执行完资源清理后，应该及时调用process.exit退出进程
+避免二次收到信号造成资源重复释放
+
+TODO
+devicemanager在没有开启子进程时，只会触发一次SIGINT
+当开启子进程时，会触发两次SIGINT
+*/
+Lifecycle.prototype.resCleanup = function(signal) {
+  log.info("Winding down for graceful exit with signal: " + signal)
 
   this.ending = true
 
-    /*
+  /*
     没有正常处理cleanupHandler中的异常
-    */
+  */
   var wait = Promise.all(this.resCleanupHandlers.map(function(handler) {
     return handler()
   }))
 
   return wait.then(function() {
-    //process.exit(0)
+    process.exit(0)
+  })
+  .catch(function(error){
+    process.exit(-1)
+  })
+  .finally(function(){
+    
   })
 }
 /*
@@ -94,6 +108,7 @@ Lifecycle.prototype.resCleanup = function() {
     否则将资源无法完全释放（可能间接导致进程无法正常退出）
 */
 Lifecycle.prototype.regCleanupHandler = function(promise) {
+  //console.trace()
   this.resCleanupHandlers.push(promise)
 }
 

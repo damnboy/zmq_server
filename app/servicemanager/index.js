@@ -8,17 +8,18 @@ var lifecycle = require("../utils/lifecycle")
 
 
 module.exports = function(options){
-
-    var log = logger.createLogger("[SERVICE MANAGER]")
+    var log = logger.createLogger('['+ options.description + ']')
 
     var appdealer = zmq.socket("dealer");   
-    appdealer.connect(options.endpoints.appdealer)
+    log.info('App dealer connected to "%s"', options.endpoints.appDealer)
+    appdealer.connect(options.endpoints.appDealer)
     appdealer.on("message", function(appid, networkenvelop){
 
     })
 
     var devdealer = zmq.socket("dealer");
-    devdealer.connect(options.endpoints.devdealer)
+    log.info('Device dealer connected to "%s"', options.endpoints.devDealer)
+    devdealer.connect(options.endpoints.devDealer)
 
      
     function onMessage(){
@@ -29,6 +30,7 @@ module.exports = function(options){
         function onNetworkEnvelop(deviceid, networkenvelop){
             messageRouter()
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage, function(deviceid, devideIntroductionMessage){
+                
                 appdealer.send([deviceid, 
                 messageUtil.envelope(
                             messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceIntroductionMessage,
@@ -53,18 +55,33 @@ module.exports = function(options){
                             devideReadyMessage.encode())])
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage, function(deviceid, devideAbsentMessage){
+                //前段，提示设备离线
                 appdealer.send([deviceid, 
                 messageUtil.envelope(
                             messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceAbsentMessage,
                             devideAbsentMessage.encode())])
+                //后端，进程销毁
+                devdealer.send([deviceid, 
+                messageUtil.envelope(
+                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceAbsentMessage,
+                            devideAbsentMessage.encode())])
+
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceHeartbeatMessage, function(deviceid, devideHeartbeatMessage){
+                appdealer.send([deviceid, 
+                messageUtil.envelope(
+                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceHeartbeatMessage,
+                            devideHeartbeatMessage.encode())])
             })
             .generalHandler(deviceid, networkenvelop)
         }
 
+        
         if(isValidZmqMessage(arguments)){
             return onNetworkEnvelop(arguments[0], arguments[1])
         }
         else{
+            console.log(arguments[0].toString())
             log.warn("illegal zmq message received with " + arguments.length + " frames")
         }
     }
@@ -72,7 +89,7 @@ module.exports = function(options){
     devdealer.on("message", onMessage)
 
     lifecycle.regCleanupHandler(function(){
-        //log.info("stop tracking devices")
+        log.info("closing zmq socket");
         [devdealer, appdealer].forEach(function(socket){
             try{
                 socket.close()

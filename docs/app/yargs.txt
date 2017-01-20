@@ -1,0 +1,18 @@
+#参数来源
+##命令行传入
+通过.option进行配置
+.option('ip',{
+    type: 'string'
+})
+##配置文件
+-
+##环境变量
+通过.env指定环境变量的前缀
+.env('YARGS')
+解析以YARGS_为前缀的环境变量
+##默认参数
+通过.option的default选项进行配置
+.option('ip',{
+    type: 'string'
+    ,default : '127.0.0.1'
+})

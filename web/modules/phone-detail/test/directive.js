@@ -13,7 +13,7 @@ module.exports = function($window){
         canvas.height = document.documentElement.clientHeight;
         canvas.width = canvas.height * raw_ratio;
     
-          var ws = new WebSocket('ws://127.0.0.1:12345');
+          var ws = new WebSocket('ws://' + scope.device.wsUrl);
           ws.binaryType = 'blob'
           ws.onmessage = function(message) {
              console.log(message);

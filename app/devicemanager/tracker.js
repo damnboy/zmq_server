@@ -76,18 +76,8 @@ NetworkDevicesTracker.prototype.startTracking = function(options){
 
             messageRouter()
             .on(messageDefines.com.example.ponytail.testjeromq.LoginMessage, function(deviceid, loginMessage){
-                /*
-                console.log(loginMessage)
-                device = _.assign(device, {
-                    onwer : loginMessage.username,
-                    serial : loginMessage.deviceIdentity.serial,
-                    osVersion : loginMessage.deviceIdentity.version,
-                    deviceModel: loginMessage.deviceIdentity.model,
-                })
-                */
                 _this.emit("login", device);
                 _this.emit("registed", device);
-
             })
             .on(messageDefines.com.example.ponytail.testjeromq.LogoffMessage, function(deviceId, logoffMessage){
                 _this.emit("logoff", device);
@@ -97,9 +87,7 @@ NetworkDevicesTracker.prototype.startTracking = function(options){
 
             })
             .on(messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage, function(deviceId, testConnMessage){
-                _this.replySuccess(deviceId, 
-                    messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.TestConnectionMessage,
-                    new messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage("PONG").encodeNB())
+
             })
             .generalHandler(deviceId, networkEnvelopMessage)
         })

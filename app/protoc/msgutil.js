@@ -19,4 +19,10 @@ var msgutil = {
 	}
 }
 
+var util = {
+	envelop : function (message){
+		var typecode = message.$code;
+		var networkEnvelop = new msgdef.com.example.ponytail.testjeromq.NetworkEnvelope(typecode, message.encodeNB()).encodeNB();
+	}
+}
 module.exports = msgutil;
