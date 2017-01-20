@@ -1,0 +1,3 @@
+[submodule "submodules/stf"]
+	path = submodules/stf
+	url = https://github.com/openstf/stf.git
