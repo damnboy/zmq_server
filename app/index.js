@@ -36,45 +36,44 @@ argv
 
 function launch(argv){
     var procs = [
+
 			procutil.fork('./cli',[
 				'triproxy', 
 				,'--description', 'TRIPROXY FOR DEVICES'
 				,'--bind-pub',argv.bindDevPub
 				,'--bind-pull',argv.bindDevPull
 				,'--bind-dealer',argv.bindDevDealer
-			]),
-			procutil.fork('./cli',[
+			])
+			,procutil.fork('./cli',[
 				'triproxy', 
 				,'--description', 'TRIPROXY FOR APP'
 				,'--bind-pub',argv.bindAppPub
 				,'--bind-pull',argv.bindAppPull
 				,'--bind-dealer',argv.bindAppDealer
-			]),
-
-			procutil.fork('./cli',[
+			])
+			,procutil.fork('./cli',[
 				'servicemanager', 
 				,'--connect-dev-dealer',argv.bindDevDealer
 				,'--connect-app-dealer',argv.bindAppDealer
-			]),
-			procutil.fork('./cli',[
+			])/*
+			,procutil.fork('./cli',[
           'heartbeat' 
 					,'--heartbeat-timeout', 10000
           ,'--connect-push', argv.bindDevPull
           ,'--connect-sub', argv.bindAppPub
-      ]),
-			procutil.fork('./cli',[
+      ])*/
+			,procutil.fork('./cli',[
           'websocketserver' 
 					,'--port', 7110
           ,'--connect-push', argv.bindAppPull
           ,'--connect-sub', argv.bindAppPub
-      ]),
-			procutil.fork('./cli',[
-          'devicemanager'
-          ,'--network-interface-name', 'en4'
+      ])
+			,procutil.fork('./cli',[
+          'devicemanager', 'devicemanager'
+          ,'--interface', 'en0'
           ,'--connect-push', argv.bindDevPull
           ,'--connect-sub', argv.bindDevPub
       ])
-        
     ]
     Promise.all(procs)
     .then(function(){

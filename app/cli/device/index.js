@@ -1,11 +1,11 @@
-module.exports.command = 'device [serial]'
+module.exports.command = 'device [description]'
 
 module.exports.describe = 'Start a device  manager unit'
 
 module.exports.builder = function(yargs) {
   return yargs
     .strict()
-    .option('network-interface-name', {
+    .option('interface', {
         describe : 'Register listener for network device tracker on specifical local network interface'
         , type : 'string'
         , choices : (function(){
@@ -17,6 +17,12 @@ module.exports.builder = function(yargs) {
             return devnames
         })()
         , demand: true
+    })
+    .option('serial', {
+     describe: 'Device global identity'
+    //, array: true
+    , type: 'string'
+    , demand: true
     })
     .option('connect-push', {
       alias: 'p'
@@ -41,6 +47,13 @@ module.exports.builder = function(yargs) {
     , type: 'number'
     , demand: true
     })
+    .option('session-id', {
+      //describe: 'Port allocated to adb connections.'
+      describe: 'Dynamic session id for LoginMessage.'
+    , type: 'string'
+    //, demand: true
+    })
+  
     /*
     .option('adb-host', {
       describe: 'The ADB server host.'
@@ -137,13 +150,15 @@ module.exports.builder = function(yargs) {
 
 module.exports.handler = function(argv) {
   return require('../../device')({
-    serial: argv.serial
-  , interface : argv.networkInterfaceName
+    description: argv.description
+  , serial: argv.serial
+  , interface : argv.interface
   , endpoints: {
       sub: argv.connectSub
     , push: argv.connectPush
     }
   , screenPort: argv.screenPort
   , connectPort: argv.connectPort
+  , sessionId: argv.sessionId
   })
 }

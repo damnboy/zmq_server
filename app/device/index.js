@@ -1,3 +1,7 @@
+/*
+    debug command
+        node ./cli device okdev --connect-push tcp://127.0.0.1:8100 --connect-sub tcp://127.0.0.1:8200 --screen-port 8300 --connect-port 8400  --network-interface-name en0
+*/
 var zmq = require("zmq");
 var net = require("net");
 var messageDefines = require("../protoc/msgdef.js");
@@ -18,23 +22,30 @@ module.exports = function(options){
     var sub = zmq.socket("sub");
     sub.subscribe(options.serial)
     sub.connect(options.endpoints.sub)   //connect to triproxy pub
-    function onFrontendEnvelop(deviceid, frontendEnvelop){
+    function onFrontendEnvelop(deviceId, frontendEnvelop){
+        messageRouter()
+            .on(messageDefines.com.example.ponytail.testjeromq.ScreenStreamMessage, function(deviceId, screenStreamMessage){
+                var word = screenStreamMessage.enable ? 'enable' : 'disable';
+                log.info('Trying to ' + word + ' screen stream on remote deivce')
+                dealer.send([deviceId, msgUtil.envelope(screenStreamMessage)])
+            })
+            .generalHandler(deviceId, frontendEnvelop)
 
     }
     sub.on("message", onFrontendEnvelop)
 
     log.info('Try Detecting inet address on ' + options.interface)
     var inetAddrs = osutil.localInetAddress(options.interface);
-
+    var inetAddr = inetAddrs[0];
     var imgRouter = new EventEmitter();
     
-    inetAddrs.forEach(function(addr){
+    //inetAddrs.forEach(function(addr){
         var wss = new WebSocket.Server({
             port: options.screenPort
         , perMessageDeflate: false
         })
 
-        log.info('Waiting incoming connection on ' + 'ws://' + addr + ':' + options.screenPort )
+        log.info('Waiting incoming connection on ' + 'ws://' + inetAddr + ':' + options.screenPort )
         wss.on('connection', function(ws){
             log.info('incoming websocket client')
             imgRouter.on('image', function(frame){
@@ -45,12 +56,12 @@ module.exports = function(options){
                     })
             })
         })
-    })
+    //})
 
 
-    inetAddrs.forEach(function(addr){
+    //inetAddrs.forEach(function(addr){
         var dealer = zmq.socket("router");
-        var uri = 'tcp://' + inetAddrs + ':' + options.connectPort;
+        var uri = 'tcp://' + inetAddr + ':' + options.connectPort;
         dealer.bind(uri, function(error){
             if(error){
                 log.info(error)
@@ -70,30 +81,45 @@ module.exports = function(options){
                 .on(messageDefines.com.example.ponytail.testjeromq.DeviceHeartbeatMessage, function(deviceId, heartBeatMessage){
                     //DeviceReadyMessage
                     log.info('DeviceHeartbeatMessage')
-                    push.send([device.id, msgUtil.envelope(
-                        messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceHeartbeatMessage,
-                        heartBeatMessage.encode()
-                    )])
+                    push.send([device.id, msgUtil.envelope(heartBeatMessage)])
                 })
-                .on(messageDefines.com.example.ponytail.testjeromq.DeviceIdentityMessage, function(deviceId, identityMessage){
-                    //DeviceIdentityMessage
-                    push.send([device.id, msgUtil.envelope(
-                        messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceIdentityMessage,
-                        identityMessage.encode()
-                    )])
+                .on(messageDefines.com.example.ponytail.testjeromq.ScreenControlMessage, function(deviceId, screenControlMessage){
+                    var enable = screenControlMessage.enable;
+                    log.info(enable ? 'ScreenControlMessage: enable' : 'ScreenControlMessage: disable');
+
+                    dealer.send([device.id, msgUtil.envelope(
+                        new messageDefines.com.example.ponytail.testjeromq.ScreenControlMessage(enable))])
+                })
+                //模拟device/plugins/solo.js发送DeviceIdentityMessage，DeviceReadyMessage
+                .on(messageDefines.com.example.ponytail.testjeromq.DeviceIdentityMessage, function(deviceId, identityMessage, sessionId){
+                    log.info('DeviceIdentityMessage');
+
+                    /*
+                        将准备就绪的用于传输设备屏幕图像的Websocket服务器地址填充到
+                        DeviceIdentityMessage
+                            DeviceDisplayMessage(url)
+                            DevicePhoneMessage
+                    */
+                    identityMessage.display.url = ('ws://' + inetAddr + ':' + options.screenPort)
+                    push.send([device.id, msgUtil.envelope(identityMessage)])
+
                     //DeviceReadyMessage
                     push.send([device.id, msgUtil.envelope(
-                        messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceReadyMessage,
-                        new messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage(device.id, device.id).encodeNB()
+                        new messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage(device.id, device.id)
                     )])
+
+                    //当前进程状态信息
                 })
                 .on(messageDefines.com.example.ponytail.testjeromq.ScreenFrameMessage, function(deviceId, screenFrameMessage){
+                    //log.info('ScreenFrameMessage')
                     var chunk = screenFrameMessage.frame;
                     chunk = chunk.copy(chunk.offset, chunk.limit);
                     chunk = chunk.buffer;
-                    
                     if(chunk.length === 24){ //解析banner帧
                         log.info('got banner frame')
+                        readFrameBytes = 0
+                        frameBodyLength = 0
+                        frameBody = new Buffer(0)
                     }
                     else{ //拆帧，发送
                         for (var cursor = 0, len = chunk.length; cursor < len;) {
@@ -104,39 +130,39 @@ module.exports = function(options){
                             //console.info('headerbyte%d(val=%d)', readFrameBytes, frameBodyLength)
                             }
                             else{
-                            if (len - cursor >= frameBodyLength) {
-                                
+                                if (len - cursor >= frameBodyLength) {
+                                    
 
-                                frameBody = Buffer.concat([
-                                frameBody
-                                , chunk.slice(cursor, cursor + frameBodyLength)
-                                ])
-                                
-                                // Sanity check for JPG header, only here for debugging purposes.
-                                if (frameBody[0] !== 0xFF || frameBody[1] !== 0xD8) {
-                                console.error(
-                                    'Frame body does not start with JPG header', frameBody)
-                                break;
+                                    frameBody = Buffer.concat([
+                                    frameBody
+                                    , chunk.slice(cursor, cursor + frameBodyLength)
+                                    ])
+                                    
+                                    // Sanity check for JPG header, only here for debugging purposes.
+                                    if (frameBody[0] !== 0xFF || frameBody[1] !== 0xD8) {
+                                    console.error(
+                                        'Frame body does not start with JPG header', frameBody)
+                                    break;
+                                    }
+
+                                    imgRouter.emit('image', frameBody)
+                                    log.info('got new screenshot(len=%d)', frameBody.length)
+                                    //console.log(frameBody)
+                                    cursor += frameBodyLength
+                                    frameBodyLength = readFrameBytes = 0
+                                    frameBody = new Buffer(0)
+                                    
                                 }
+                                else{
+                                    frameBody = Buffer.concat([
+                                    frameBody
+                                    , chunk.slice(cursor, len)
+                                    ])
 
-                                imgRouter.emit('image', frameBody)
-                                //log.info('got new screenshot(len=%d)', frameBody.length)
-                                console.log(frameBody)
-                                cursor += frameBodyLength
-                                frameBodyLength = readFrameBytes = 0
-                                frameBody = new Buffer(0)
-                                
-                            }
-                            else{
-                                frameBody = Buffer.concat([
-                                frameBody
-                                , chunk.slice(cursor, len)
-                                ])
-
-                                frameBodyLength -= len - cursor
-                                readFrameBytes += len - cursor
-                                cursor = len
-                            }
+                                    frameBodyLength -= len - cursor
+                                    readFrameBytes += len - cursor
+                                    cursor = len
+                                }
                             }
                         }
                     }
@@ -144,20 +170,21 @@ module.exports = function(options){
                 .generalHandler(deviceId, networkenvelop)
         }
         dealer.on('message', onNetworkEnvelop)
-    })
+    //})
 
     if(process.connected){
         process.send({
             message : 'ready',
-            dealer : options.dealerUri
+            dealer : 'tcp://'+inetAddrs[0] + ':' + options.connectPort,
+            sessionId: options.sessionId
         })
         
         process.on('message',function(message){
             process.send({
                 message : 'ready',
-                dealer : options.dealerUri
+                dealer : 'tcp://'+inetAddrs[0] + ':' + options.connectPort,
+                sessionId: message.sessionId
             })
         })
     }
-
 }

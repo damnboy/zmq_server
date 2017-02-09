@@ -102,6 +102,5 @@ module.exports = messageDefines
 
 
 /*
-protoc -IPATH=/Users/ponytail/openstf/node/npm/ZeroMQ/project/protoc --java_out=/Users/ponytail/openstf/node/npm/ZeroMQ/project/protoc/java msg.proto 
-protoc -IPATH=./ --java_out=/Users/ponytail/AndroidStudioProjects/TestJeroMQ/app/src/main/java/  msg.proto
+protoc -IPATH=./ --java_out=/Users/ponytail/AndroidStudioProjects/TestJeroMQ/app/src/main/java/ msg.proto
 */

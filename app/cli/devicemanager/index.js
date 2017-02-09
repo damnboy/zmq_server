@@ -1,4 +1,4 @@
-module.exports.command = 'devicemanager [interface..]'
+module.exports.command = 'devicemanager [description]'
 
 module.exports.describe = 'Start a device manager & network tracker'
 
@@ -6,7 +6,7 @@ module.exports.builder = function(yargs){
 
     yargs
     .strict()
-    .option('network-interface-name', {
+    .option('interface', {
         describe : 'Register listener for network device tracker on specifical local network interface'
         , type : 'string'
         , choices : (function(){
@@ -41,12 +41,12 @@ module.exports.builder = function(yargs){
         , describe: 'Highest port number for device workers to use.'
         , type: 'number'
         , default: 7700
-    })
-    .option('description', {
+    })/*
+    .option('', {
       describe: 'An easily identifiable name for log output.'
     , type: 'string'
     , default : 'DEVICE MANAGER'
-    })
+    })*/
 }
 
 module.exports.handler = function(argv){
@@ -60,7 +60,7 @@ module.exports.handler = function(argv){
 
     return require('../../devicemanager')({
         description : argv.description
-        , interface : argv.networkInterfaceName
+        , interface : argv.interface
         ,endpoints : {
             pull :	argv.connectPush
             ,pub :	argv.connectSub
@@ -69,7 +69,8 @@ module.exports.handler = function(argv){
         ,fork : function(device, host, ports){
             var fork = require('child_process').fork;
             var args = [
-                'device', device.id
+                'device', device
+                ,'--serial' , device.id
                 ,'--screen-port' , port.shift()
                 ,'--connect-port', port.shift()
                 ,'--network-interface-name' , argv.networkInterfaceName

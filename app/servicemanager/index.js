@@ -13,8 +13,12 @@ module.exports = function(options){
     var appdealer = zmq.socket("dealer");   
     log.info('App dealer connected to "%s"', options.endpoints.appDealer)
     appdealer.connect(options.endpoints.appDealer)
-    appdealer.on("message", function(appid, networkenvelop){
-
+    appdealer.on("message", function(deviceId, networkenvelop){
+            messageRouter()
+            .on(messageDefines.com.example.ponytail.testjeromq.ScreenStreamMessage, function(deviceId, screenStreamMessage){
+                devdealer.send([deviceId, messageUtil.envelope(screenStreamMessage)])
+            })
+            .generalHandler(deviceId, networkenvelop)
     })
 
     var devdealer = zmq.socket("dealer");
@@ -30,48 +34,31 @@ module.exports = function(options){
         function onNetworkEnvelop(deviceid, networkenvelop){
             messageRouter()
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage, function(deviceid, devideIntroductionMessage){
-                
-                appdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceIntroductionMessage,
-                            devideIntroductionMessage.encode())])
+                //log.info('DeviceIntroductionMessage')
+                appdealer.send([deviceid, messageUtil.envelope(devideIntroductionMessage)])
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage, function(deviceid, devidePresentMessage){
-                appdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DevicePresentMessage,
-                            devidePresentMessage.encode())])
+                //log.info('DevicePresentMessage')
+                appdealer.send([deviceid, messageUtil.envelope(devidePresentMessage)])
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceIdentityMessage, function(deviceid, devideIdentityMessage){
-                appdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceIdentityMessage,
-                            devideIdentityMessage.encode())])
+                //log.info('DeviceIdentityMessage')
+                appdealer.send([deviceid, messageUtil.envelope(devideIdentityMessage)])
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage, function(deviceid, devideReadyMessage){
-                appdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceReadyMessage,
-                            devideReadyMessage.encode())])
+                //log.info('DeviceReadyMessage')
+                appdealer.send([deviceid, messageUtil.envelope(devideReadyMessage)])
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage, function(deviceid, devideAbsentMessage){
+                //log.info('DeviceAbsentMessage')
                 //前段，提示设备离线
-                appdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceAbsentMessage,
-                            devideAbsentMessage.encode())])
+                appdealer.send([deviceid, messageUtil.envelope(devideAbsentMessage)])
                 //后端，进程销毁
-                devdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceAbsentMessage,
-                            devideAbsentMessage.encode())])
+                devdealer.send([deviceid, messageUtil.envelope(devideAbsentMessage)])
 
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceHeartbeatMessage, function(deviceid, devideHeartbeatMessage){
-                appdealer.send([deviceid, 
-                messageUtil.envelope(
-                            messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceHeartbeatMessage,
-                            devideHeartbeatMessage.encode())])
+                appdealer.send([deviceid, messageUtil.envelope(devideHeartbeatMessage)])
             })
             .generalHandler(deviceid, networkenvelop)
         }

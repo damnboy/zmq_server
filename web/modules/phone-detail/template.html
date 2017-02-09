@@ -1,0 +1,15 @@
+TBD: Detail view for 
+<span>serial: {{$ctrl.device.serial}}</span><br/>
+<span>abi: {{$ctrl.device.abi}}</span><br/>
+<span>manufactuer: {{$ctrl.device.manufacturer}}</span><br/>
+<span>model: {{$ctrl.device.model}}</span><br/>
+<span>product: {{$ctrl.device.product}}</span><br/>
+<span>sdk: {{$ctrl.device.sdk}}</span><br/>
+<span>version: {{$ctrl.device.version}}</span><br/>
+<span>iccid: {{$ctrl.device.phone.iccid}}</span><br/>
+<span>imei: {{$ctrl.device.phone.imei}}</span><br/>
+<span>network: {{$ctrl.device.phone.network}}</span><br/>
+<span>phoneNumber: {{$ctrl.device.phone.phoneNumber}}</span><br/>
+<p ng-click="$ctrl.onOpenScreenStream()">开始监视屏幕</p>
+<p ng-click="$ctrl.onCloseScreenStream()">停止监视屏幕</p>
+<device-screen display="$ctrl.device.display"><device-screen>

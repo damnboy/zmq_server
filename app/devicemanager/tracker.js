@@ -75,18 +75,21 @@ NetworkDevicesTracker.prototype.startTracking = function(options){
             var device = _.assign({}, {id : deviceId.toString()})
 
             messageRouter()
-            .on(messageDefines.com.example.ponytail.testjeromq.LoginMessage, function(deviceid, loginMessage){
-                _this.emit("login", device);
-                _this.emit("registed", device);
+            .on(messageDefines.com.example.ponytail.testjeromq.LoginMessage, function(deviceid, loginMessage, sessionId){
+                _this.emit("login", device, sessionId);
+                _this.emit("registed", device, sessionId);
+
             })
-            .on(messageDefines.com.example.ponytail.testjeromq.LogoffMessage, function(deviceId, logoffMessage){
-                _this.emit("logoff", device);
+            .on(messageDefines.com.example.ponytail.testjeromq.LogoffMessage, function(deviceId, logoffMessage, sessionId){
+                _this.emit("logoff", device, sessionId);
+                /*
                 _this.replySuccess(deviceId, 
                     messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.TestConnectionMessage,
                     new messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage("PONG").encodeNB())
+                */
 
             })
-            .on(messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage, function(deviceId, testConnMessage){
+            .on(messageDefines.com.example.ponytail.testjeromq.TestConnectionMessage, function(deviceId, testConnMessage, sessionId){
 
             })
             .generalHandler(deviceId, networkEnvelopMessage)
@@ -104,6 +107,12 @@ NetworkDevicesTracker.prototype.stopTracking = function(){
     }
 }
 
+NetworkDevicesTracker.prototype.reply = function(deviceId, message){
+    if(this.router){
+        this.router.send([deviceId, message])
+    }
+}
+/*
 NetworkDevicesTracker.prototype.replySuccess = function(deviceId, type, message){
     if(this.router){
         var envlope = msgUtil.reply().success(type,message);
@@ -117,7 +126,7 @@ NetworkDevicesTracker.prototype.replyFailed = function(deviceId, type, message){
         this.router.send([deviceId, envlope]);
     }
 }
-
+*/
 
 
 module.exports = new NetworkDevicesTracker;

@@ -3,7 +3,7 @@ var logger = require("../utils/logger")
 var lifecycle = require("../utils/lifecycle")
 var messageDefines = require("../protoc/msgdef.js")
 var messageRouter = require("../protoc/msgrouter.js")
-var messageUtil = require("../protoc/msgutil.js")
+var msgUtil = require("../protoc/msgutil.js")
 var socketio = require("socket.io");
 /*
 创建websocket，首次连上websocket之后，获取所有在线设备信息
@@ -93,12 +93,15 @@ module.exports = function(options){
         //在该socket上注册一组消息处理回调函数
 
         //设备使用状态
-        socket.on('device.state', function(){
+        socket.on('screen.stream.open', function(deviceId, data){
+          push.send([deviceId, msgUtil.envelope(
+                        new messageDefines.com.example.ponytail.testjeromq.ScreenStreamMessage(true))])
 
         })
         //设备触摸
-        socket.on('touch', function(){
-
+        socket.on('screen.stream.close', function(deviceId, data){
+          push.send([deviceId, msgUtil.envelope(
+                        new messageDefines.com.example.ponytail.testjeromq.ScreenStreamMessage(false))])
         })
         //设备按键
         socket.on('key', function(){

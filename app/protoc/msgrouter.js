@@ -67,8 +67,9 @@ Router.prototype.generalHandler = function(deviceId, networkEnvelope){
     var envelope = messageDefines.com.example.ponytail.testjeromq.NetworkEnvelope.decode(networkEnvelope);
     var messageType = messageDefines.ReverseMessageType[envelope.type];
     var messageDef = messageDefines.com.example.ponytail.testjeromq[messageType];
+    var sessionId = envelope.sessionId;
     var decodedMessage = messageDef.decode(envelope.message);
-    this.emit(messageDef.$code, deviceId, decodedMessage);
+    this.emit(messageDef.$code, deviceId, decodedMessage, sessionId);
   //}
   //catch(error){
     //console.log("illegal protocol buffer message: " + error);

@@ -5,21 +5,21 @@ angular.module('deviceScreen', [
 .component('deviceScreen', {
     template: '<div style="text-align:center"><canvas></canvas></div>',
     bindings : {
-      device : '<'
+      display : '<'
     },
     controller : ['$scope', '$element', '$attrs', '$routeParams',  
       function($scope, $element, $attrs, $routeParams){
-
+          console.log(this.display)
           var min_scale = 0.36;
           var canvas = $element.find('canvas')[0];
           //按照当前浏览器的高度，初始化最佳canvas大小
-          var raw_ratio = this.device.width/this.device.height;
+          var raw_ratio = this.display.width/this.display.height;
           canvas.height = document.documentElement.clientHeight;
           canvas.width = canvas.height * raw_ratio;
         
           //var BLANK_IMG =
           //'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
-          var ws = new WebSocket(this.device.screenWs);
+          var ws = new WebSocket(this.display.url);
           ws.binaryType = 'blob'
           ws.onmessage = function(message) {
             try{

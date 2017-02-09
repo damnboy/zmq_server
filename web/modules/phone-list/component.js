@@ -1,7 +1,7 @@
 module.exports = (function(){
   return {
     templateUrl:'./modules/phone-list/template.html',
-    controller: ['$scope', 'DeviceService', function PhoneListController($scope, DeviceService) {
+    controller: ['$scope', 'DeviceService','IdentityService', function PhoneListController($scope, DeviceService, IdentityService) {
       var self = this;
       this.tracker = DeviceService.trackAll($scope);
 
@@ -29,6 +29,7 @@ module.exports = (function(){
          var phones = self.tracker.devices;
          phones.forEach(function(phone){
            if(phone.serial === serial){
+             IdentityService.device = phone;
              if(phone.usable === false){
                alert('offline');
              }

@@ -12,7 +12,10 @@ var msgUtil = require("../protoc/msgutil.js");
 var osutil = require('../utils/osutil.js');
 var cliutil = require('../utils/cliutil.js');
 
-
+/*
+    debug command
+        node ./cli devicemanager --network-interface-name en4 --connect-push tcp://127.0.0.1:8100 --connect-sub tcp://127.0.0.1:8200
+*/
 module.exports = function(options){
 
 
@@ -48,20 +51,22 @@ module.exports = function(options){
     .then(function(){
         log.info("start tracking devices " + cliutil.buildUriArray(inetAddrs, 10000))
 
-        tracker.on("registed", function(device){
+        tracker.on("registed", function(device, sessionId){
             if(undefined != deviceInstances[device.id]){
-                deviceInstances[device.id].send('relogin')
+                deviceInstances[device.id].send({
+                    message: 'relogin',
+                    sessionId: sessionId
+                })
             }else{
                 proxyTracker.emit(device.id, "registed")
             }
             
         })
 
-        tracker.on("login", function(device){
+        tracker.on("login", function(device, sessionId){
 
             push.send([device.id, msgUtil.envelope(
-                messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceIntroductionMessage,
-                new messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage(device.id).encodeNB()
+                new messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage(device.id)
             )])
             
             //检查进程是否存在
@@ -78,19 +83,20 @@ module.exports = function(options){
 
                 function forkDeviceInstance(){
                     var allocatedPorts = ports.splice(0, 4);
-                    var proc = childProcess.fork("./device", [device.id
-                        , (function(){
-                            var uris = [];
-                            allocatedPorts.forEach(function(port){
-                                inetAddrs.forEach(function(addr){
-                                    uris.push(cliutil.buildUri('tcp', addr, port))
-                                })
-                            })
-                            return uris.join();
-                        })()
-                        ,options.endpoints.pull
-                        ,options.endpoints.pub]
+                    log.info('Forking process for device[' +device.id +']')
+                    var proc = childProcess.fork('./cli',
+                        [
+                            'device', 'okvm',//new Buffer(device.id)
+                            ,'--serial', device.id
+                            ,'--connect-push', options.endpoints.pull //'tcp://127.0.0.1:8100' 
+                            ,'--connect-sub', options.endpoints.pub //tcp://127.0.0.1:8200'
+                            ,'--screen-port', allocatedPorts.shift() 
+                            ,'--connect-port', allocatedPorts.shift() 
+                            ,'--interface', options.interface
+                            ,'--session-id', sessionId
+                        ]
                     )
+
                     log.info('available port remains: ' + ports.length);
                     proc.on("exit", function(code, signal){
                         if(code === 0 || signal){   //不需要处理unregisted时，发送的SIG 
@@ -98,31 +104,31 @@ module.exports = function(options){
                             allocatedPorts.forEach(function(p){
                                 ports.push(p);
                             })
-                            log.info('available port remains: ' + ports.length)
+                            log.info('after exit available port remains: ' + ports.length)
                             push.send([device.id, msgUtil.envelope(
-                                messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceAbsentMessage,
-                                new messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage(device.id).encodeNB())])
+                                new messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage(device.id))])
                         }
                         else{
                             log.info("restart device instance[" + device.id + "]")
                             deviceInstances[device.id] = forkDeviceInstance()
+                            //TODO n次启动失败时候，或启动进程超时，通过tracker返回信息给设备端
                         }
                     })
                     proc.on("message", function(message){
                         if(message.message === "ready"){
                             log.info("device instance[" + device.id + "] is ready")
                             log.info("device instance[" + device.id + "] open control service at: " + message.dealer)
-                            //TODO通过tracker发送设备注册成功消息,注册设备资源成功
 
                             //向前端发送设备上线消息
                             push.send([device.id, msgUtil.envelope(
-                                messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DevicePresentMessage,
-                                new messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage(device.id).encodeNB()
+                                new messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage(device.id)
                             )])
 
                             //向后端发送注册信息
-                            tracker.replySuccess(device.id, messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceRegisteredMessage,
-                                new messageDefines.com.example.ponytail.testjeromq.DeviceRegisteredMessage(device.id, message.dealer).encodeNB())
+                            tracker.reply(device.id, 
+                                msgUtil.transaction(message.sessionId).success(
+                                    new messageDefines.com.example.ponytail.testjeromq.DeviceRegisteredMessage(device.id, message.dealer)))
+
                         }
                     })
                     return proc;
@@ -157,11 +163,13 @@ module.exports = function(options){
                         .timeout(5000)
                         .then(function(){
                             log.info("Device Instance["+ device.id+"] terminated")
+                            //TODO 发送成功登出消息
                         })
                         .catch(function(error){
                             kill(deviceInstances[device.id], "SIGKILL")
                             .then(function(){
                                 log.info("Device Instance["+ device.id+"] killed")
+                                //TODO 发送异常登出消息
                             })
                         })
                     }
@@ -170,7 +178,7 @@ module.exports = function(options){
 
         })
 
-        tracker.on("logoff", function(device){
+        tracker.on("logoff", function(device, sessionId){
             log.info("detect logoff device: " + device.id)
             proxyTracker.emit(device.id, "unregisted")
         })

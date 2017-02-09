@@ -49,9 +49,7 @@ module.exports = function(options){
     log.info('Device "%s" is present', deviceId)
     push.send([
       deviceId
-    , messageUtil.envelope(
-        messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DevicePresentMessage,
-        new messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage(deviceId).encodeNB())
+    , messageUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage(deviceId))
     ])
   })
 
@@ -59,9 +57,7 @@ module.exports = function(options){
     log.info('Reaping device "%s" due to heartbeat timeout', deviceId)
     push.send([
       deviceId
-    , messageUtil.envelope(
-        messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.DeviceAbsentMessage,
-        new messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage(deviceId).encodeNB())
+    , messageUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage(deviceId))
     ])
   })
 
