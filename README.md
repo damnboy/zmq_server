@@ -33,9 +33,6 @@ Note: The deployment description is based on CentOS!!!
     rpm -Uvh cert-forensics-tools-release*rpm
     yum --enablerepo=forensics install protobuf-devel
 
-成功之后查看程序安装路径 
-
-    rpm -ql `rpm -qa httpd`
 
 ## 启动
 
@@ -70,3 +67,7 @@ webpack时需要注意是否存在oboe错误，如果报错，将./web/bower_com
 
     httpserver ./web -p 1080
 
+
+#remark
+rpm查看程序安装路径 
+    rpm -ql `rpm -qa httpd`

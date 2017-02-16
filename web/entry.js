@@ -33778,12 +33778,14 @@
 	         phones.forEach(function(phone){
 	           if(phone.serial === serial){
 	             IdentityService.device = phone;
+	             /*
 	             if(phone.usable === false){
 	               alert('offline');
 	             }
 	             else{
 	               alert('online');
 	             }
+	             */
 	           }
 	         })
 	       }
@@ -61877,9 +61879,10 @@
 	angular.module('phoneDetail', [
 	  'ngRoute',
 	  __webpack_require__(68).name,
-	  __webpack_require__(69).name
+	  __webpack_require__(71).name,
+	  __webpack_require__(73).name
 	])
-	.component('phoneDetail', __webpack_require__(71));
+	.component('phoneDetail', __webpack_require__(75));
 	//.controller('phoneDetailController', require('./controller.js'))
 	//.directive('phoneDetail', require('./directive.js'))
 
@@ -61888,39 +61891,49 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(3)
+	__webpack_require__(69)
 	angular.module('deviceScreen', [
 	  'ngRoute'
+	  ,'stf/scaling'
 	])
 	.component('deviceScreen', {
 	    template: '<div style="text-align:center"><canvas></canvas></div>',
 	    bindings : {
-	      display : '<'
+	      device : '<'
+	      ,control : '<'
 	    },
-	    controller : ['$scope', '$element', '$attrs', '$routeParams',  
-	      function($scope, $element, $attrs, $routeParams){
-	          console.log(this.display)
+	    controller : ['$scope', '$element', '$attrs', '$routeParams', '$document','ScalingService',
+	      function($scope, $element, $attrs, $routeParams, $document, ScalingService){
+
+	        var device = this.device;
+	        var control = this.control;
+
+	        var scaler = ScalingService.coordinator(
+	          device.display.width
+	          , device.display.height
+	          )  
+
 	          var min_scale = 0.36;
 	          var canvas = $element.find('canvas')[0];
 	          //按照当前浏览器的高度，初始化最佳canvas大小
-	          var raw_ratio = this.display.width/this.display.height;
+	          var raw_ratio = device.display.width/device.display.height;
 	          canvas.height = document.documentElement.clientHeight;
 	          canvas.width = canvas.height * raw_ratio;
 	        
-	          //var BLANK_IMG =
-	          //'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
-	          var ws = new WebSocket(this.display.url);
+	          var BLANK_IMG =
+	          'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+	          var ws = new WebSocket(device.display.url);
 	          ws.binaryType = 'blob'
 	          ws.onmessage = function(message) {
 	            try{
-	              console.log(message);
-
+	              console.log(message.data.size);
 	              var canvas = $element.find('canvas')[0];
 	              var ctx = canvas.getContext('2d');
 	              var blob = new Blob([message.data], {type: 'image/jpge'})
 	              var URL = window.URL || window.webkitURL
 	              var img = new Image()
 	              img.onload = function() {
-	                console.log(img.width, img.height)
+	                //console.log(img.width, img.height)
 	                canvas.width = img.width
 	                canvas.height = img.height
 	                ctx.drawImage(img, 0, 0)
@@ -61938,7 +61951,218 @@
 	            }
 
 	          };
-	        
+
+	      (function(){
+	        var seq = -1
+	        var cycle = 100
+
+	        function nextSeq() {
+	          return ++seq >= cycle ? (seq = 0) : seq
+	        }
+
+	        function calculateBounds(el) {
+	          //var el = element[0]
+	          var screen = {
+	            rotation: 0
+	          , bounds: {
+	              x: 0
+	            , y: 0
+	            , w: 0
+	            , h: 0
+	            }
+	          }
+	          screen.bounds.w = el.offsetWidth
+	          screen.bounds.h = el.offsetHeight
+	          screen.bounds.x = 0
+	          screen.bounds.y = 0
+
+	          while (el.offsetParent) {
+	            screen.bounds.x += el.offsetLeft
+	            screen.bounds.y += el.offsetTop
+	            el = el.offsetParent
+	          }
+
+	          return screen;
+	        }
+
+	        function mouseDownListener(event) {
+	          /*
+	            clientX,clientY(478,386)
+	            layerX,layerY(478,333)
+	            offsetX,offsetY(478,280)
+	            pageX,pageY(478,386)
+	            screenX,screenY(478,312)
+	            x,y(478,386)
+
+	            原实现中有加入altKey支持，按住alt键再点击，会生成两个touch按钮
+
+	          */
+	            var e = event
+	            if (e.originalEvent) {
+	              e = e.originalEvent
+	            }
+
+	            // Skip secondary click
+	            if (e.which === 3) {
+	              return
+	            }
+
+	            e.preventDefault()
+
+	            //fakePinch = e.altKey
+
+	            /*
+	            计算出canvas所在区域的参数信息
+	              高度，宽度（offsetHeight，offsetWidth）
+	              在浏览器中的相对原点（offsetTop，offsetLeft）
+
+	              从最内部的canvas元素开始计算screen区域
+	            */
+	            var screen = calculateBounds($element.find('canvas')[0])
+	            //startMousing()
+
+	            var x = e.pageX - screen.bounds.x
+	            var y = e.pageY - screen.bounds.y
+
+	            var pressure = 0.5
+	            var scaled = scaler.coords(
+	                  screen.bounds.w
+	                , screen.bounds.h
+	                , x
+	                , y
+	                , screen.rotation
+	                )
+
+	            //计算之后可得到scaled对象，其中包含了点击点的x，y轴百分比信息
+	            //百分比信息与原始的设备屏幕高宽的乘积，既可还原浏览器中点击点与设备屏幕点击点之间的映射
+	            
+	            control.touchDown(nextSeq(), 0, scaled.xP, scaled.yP, pressure)
+	            /*
+	            if (fakePinch) {
+	              control.touchDown(nextSeq(), 1, 1 - scaled.xP, 1 - scaled.yP,
+	                pressure)
+	            }
+	            */
+
+	            control.touchCommit(nextSeq())
+	            /*
+	            activateFinger(0, x, y, pressure)
+
+	            if (fakePinch) {
+	              activateFinger(1, -e.pageX + screen.bounds.x + screen.bounds.w,
+	                -e.pageY + screen.bounds.y + screen.bounds.h, pressure)
+	            }
+	            */
+	            
+	            $element.bind('mousemove', mouseMoveListener)
+	            $document.bind('mouseup', mouseUpListener)
+	            $document.bind('mouseleave', mouseUpListener)
+	            /*
+	            if (lastPossiblyBuggyMouseUpEvent &&
+	                lastPossiblyBuggyMouseUpEvent.timeStamp > e.timeStamp) {
+	              // We got mouseup before mousedown. See mouseUpBugWorkaroundListener
+	              // for details.
+	              mouseUpListener(lastPossiblyBuggyMouseUpEvent)
+	            }
+	            else {
+	              lastPossiblyBuggyMouseUpEvent = null
+	            }
+	            */
+	            
+	          }
+
+	          function mouseUpListener(event) {
+	            var e = event
+	            if (e.originalEvent) {
+	              e = e.originalEvent
+	            }
+
+	            // Skip secondary click
+	            if (e.which === 3) {
+	              return
+	            }
+	            e.preventDefault()
+	            
+	            control.touchUp(nextSeq(), 0)
+	            /*
+	            if (fakePinch) {
+	              control.touchUp(nextSeq(), 1)
+	            }*/
+
+	            control.touchCommit(nextSeq())
+
+	            //deactivateFinger(0)
+	            /*
+	            if (fakePinch) {
+	              deactivateFinger(1)
+	            }
+	            */
+
+	            //stopMousing()
+	            $element.unbind('mousemove', mouseMoveListener)
+	            $document.unbind('mouseup', mouseUpListener)
+	            $document.unbind('mouseleave', mouseUpListener)
+	        }
+	        function mouseMoveListener(event) {
+	          var e = event
+	          if (e.originalEvent) {
+	            e = e.originalEvent
+	          }
+
+	          // Skip secondary click
+	          if (e.which === 3) {
+	            return
+	          }
+	          e.preventDefault()
+	/*
+	          var addGhostFinger = !fakePinch && e.altKey
+	          var deleteGhostFinger = fakePinch && !e.altKey
+
+	          fakePinch = e.altKey
+	*/
+	          var screen = calculateBounds($element.find('canvas')[0])
+	          var x = e.pageX - screen.bounds.x
+	          var y = e.pageY - screen.bounds.y
+	          var pressure = 0.5
+	          var scaled = scaler.coords(
+	                screen.bounds.w
+	              , screen.bounds.h
+	              , x
+	              , y
+	              , screen.rotation
+	              )
+
+	          control.touchMove(nextSeq(), 0, scaled.xP, scaled.yP, pressure)
+	/*
+	          if (addGhostFinger) {
+	            control.touchDown(nextSeq(), 1, 1 - scaled.xP, 1 - scaled.yP, pressure)
+	          }
+	          else if (deleteGhostFinger) {
+	            control.touchUp(nextSeq(), 1)
+	          }
+	          else if (fakePinch) {
+	            control.touchMove(nextSeq(), 1, 1 - scaled.xP, 1 - scaled.yP, pressure)
+	          }
+	*/
+	          control.touchCommit(nextSeq())
+	/*
+	          activateFinger(0, x, y, pressure)
+
+	          if (deleteGhostFinger) {
+	            deactivateFinger(1)
+	          }
+	          else if (fakePinch) {
+	            activateFinger(1, -e.pageX + screen.bounds.x + screen.bounds.w,
+	              -e.pageY + screen.bounds.y + screen.bounds.h, pressure)
+	          }
+	          */
+	        }
+
+	          $element.on('mousedown', mouseDownListener)
+	      })()
+
+	      
+
 
 	    }]
 	})
@@ -61949,8 +62173,233 @@
 /* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
+	module.exports = angular.module('stf/scaling', [])
+	  .factory('ScalingService', __webpack_require__(70))
+
+
+/***/ },
+/* 70 */
+/***/ function(module, exports) {
+
+	module.exports = function ScalingServiceFactory() {
+	  var scalingService = {
+	  }
+
+	  scalingService.coordinator = function(realWidth, realHeight) {
+	    var realRatio = realWidth / realHeight
+
+	    /**
+	     * Rotation affects the screen as follows:
+	     *
+	     *                   0deg
+	     *                 |------|
+	     *                 | MENU |
+	     *                 |------|
+	     *            -->  |      |  --|
+	     *            |    |      |    v
+	     *                 |      |
+	     *                 |      |
+	     *                 |------|
+	     *        |----|-|          |-|----|
+	     *        |    |M|          | |    |
+	     *        |    |E|          | |    |
+	     *  90deg |    |N|          |U|    | 270deg
+	     *        |    |U|          |N|    |
+	     *        |    | |          |E|    |
+	     *        |    | |          |M|    |
+	     *        |----|-|          |-|----|
+	     *                 |------|
+	     *            ^    |      |    |
+	     *            |--  |      |  <--
+	     *                 |      |
+	     *                 |      |
+	     *                 |------|
+	     *                 | UNEM |
+	     *                 |------|
+	     *                  180deg
+	     *
+	     * Which leads to the following mapping:
+	     *
+	     * |--------------|------|---------|---------|---------|
+	     * |              | 0deg |  90deg  |  180deg |  270deg |
+	     * |--------------|------|---------|---------|---------|
+	     * | CSS rotate() | 0deg | -90deg  | -180deg |  90deg  |
+	     * | bounding w   |  w   |    h    |    w    |    h    |
+	     * | bounding h   |  h   |    w    |    h    |    w    |
+	     * | pos x        |  x   |   h-y   |   w-x   |    y    |
+	     * | pos y        |  y   |    x    |   h-y   |   h-x   |
+	     * |--------------|------|---------|---------|---------|
+	     */
+	    return {
+	      coords: function(boundingW, boundingH, relX, relY, rotation) {
+	        var w, h, x, y, ratio, scaledValue
+
+	        switch (rotation) {
+	        case 0:
+	          w = boundingW
+	          h = boundingH
+	          x = relX
+	          y = relY
+	          break
+	        case 90:
+	          w = boundingH
+	          h = boundingW
+	          x = boundingH - relY
+	          y = relX
+	          break
+	        case 180:
+	          w = boundingW
+	          h = boundingH
+	          x = boundingW - relX
+	          y = boundingH - relY
+	          break
+	        case 270:
+	          w = boundingH
+	          h = boundingW
+	          x = relY
+	          y = boundingW - relX
+	          break
+	        }
+
+	        ratio = w / h
+
+	        if (realRatio > ratio) {
+	          // covers the area horizontally
+	          scaledValue = w / realRatio
+
+	          // adjust y to start from the scaled top edge
+	          y -= (h - scaledValue) / 2
+
+	          // not touching the screen, but we want to trigger certain events
+	          // (like touchup) anyway, so let's do it on the edges.
+	          if (y < 0) {
+	            y = 0
+	          }
+	          else if (y > scaledValue) {
+	            y = scaledValue
+	          }
+
+	          // make sure x is within bounds too
+	          if (x < 0) {
+	            x = 0
+	          }
+	          else if (x > w) {
+	            x = w
+	          }
+
+	          h = scaledValue
+	        }
+	        else {
+	          // covers the area vertically
+	          scaledValue = h * realRatio
+
+	          // adjust x to start from the scaled left edge
+	          x -= (w - scaledValue) / 2
+
+	          // not touching the screen, but we want to trigger certain events
+	          // (like touchup) anyway, so let's do it on the edges.
+	          if (x < 0) {
+	            x = 0
+	          }
+	          else if (x > scaledValue) {
+	            x = scaledValue
+	          }
+
+	          // make sure y is within bounds too
+	          if (y < 0) {
+	            y = 0
+	          }
+	          else if (y > h) {
+	            y = h
+	          }
+
+	          w = scaledValue
+	        }
+
+	        return {
+	          xP: x / w
+	        , yP: y / h
+	        }
+	      }
+	    , size: function(sizeWidth, sizeHeight) {
+	        var width = sizeWidth
+	        var height = sizeHeight
+	        var ratio = width / height
+
+	        if (realRatio > ratio) {
+	          // covers the area horizontally
+
+	          if (width >= realWidth) {
+	            // don't go over max size
+	            width = realWidth
+	            height = realHeight
+	          }
+	          else {
+	            height = Math.floor(width / realRatio)
+	          }
+	        }
+	        else {
+	          // covers the area vertically
+
+	          if (height >= realHeight) {
+	            // don't go over max size
+	            height = realHeight
+	            width = realWidth
+	          }
+	          else {
+	            width = Math.floor(height * realRatio)
+	          }
+	        }
+
+	        return {
+	          width: width
+	        , height: height
+	        }
+	      }
+	    , projectedSize: function(boundingW, boundingH, rotation) {
+	        var w, h
+
+	        switch (rotation) {
+	        case 0:
+	        case 180:
+	          w = boundingW
+	          h = boundingH
+	          break
+	        case 90:
+	        case 270:
+	          w = boundingH
+	          h = boundingW
+	          break
+	        }
+
+	        var ratio = w / h
+
+	        if (realRatio > ratio) {
+	          // covers the area horizontally
+	          h = Math.floor(w / realRatio)
+	        }
+	        else {
+	          w = Math.floor(h * realRatio)
+	        }
+
+	        return {
+	          width: w
+	        , height: h
+	        }
+	      }
+	    }
+	  }
+
+	  return scalingService
+	}
+
+
+/***/ },
+/* 71 */
+/***/ function(module, exports, __webpack_require__) {
+
 	angular.module('debug', [
-	    __webpack_require__(70).name,
+	    __webpack_require__(72).name,
 	])
 
 	module.exports.name = 'debug'
@@ -61959,7 +62408,7 @@
 
 
 /***/ },
-/* 70 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(3)
@@ -61998,15 +62447,349 @@
 	    
 
 /***/ },
-/* 71 */
+/* 73 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = angular.module('stf/control', [
+	  __webpack_require__(16).name/*,
+	  require('stf/transaction').name,
+	  require('stf/keycodes').name*/
+	])
+	  .factory('ControlService', __webpack_require__(74))
+
+
+/***/ },
+/* 74 */
+/***/ function(module, exports) {
+
+	module.exports = function ControlServiceFactory(
+	 /* $upload
+	,*/ $http
+	, socket
+	/*
+	, TransactionService
+	, $rootScope
+	, gettext
+	, KeycodesMapped
+	*/
+	) {
+	  var controlService = {
+	  }
+
+	  function ControlService(target, channel) {
+	    function sendOneWay(action, data) {
+	      socket.emit(action, channel, data)
+	    }
+	/*
+	    function sendTwoWay(action, data) {
+	      var tx = TransactionService.create(target)
+	      socket.emit(action, channel, tx.channel, data)
+	      return tx.promise
+	    }
+
+	    function keySender(type, fixedKey) {
+	      return function(key) {
+	        if (typeof key === 'string') {
+	          sendOneWay(type, {
+	            key: key
+	          })
+	        }
+	        else {
+	          var mapped = fixedKey || KeycodesMapped[key]
+	          if (mapped) {
+	            sendOneWay(type, {
+	              key: mapped
+	            })
+	          }
+	        }
+	      }
+	    }
+	*/
+	    this.screenStreamOpen = function(){
+	      sendOneWay('screen.stream.open')
+	    }
+	    this.screenStreamClose = function(){
+	      sendOneWay('screen.stream.close')
+	    }
+	    this.gestureStart = function(seq) {
+	      sendOneWay('input.gestureStart', {
+	        seq: seq
+	      })
+	    }
+
+	    this.gestureStop = function(seq) {
+	      sendOneWay('input.gestureStop', {
+	        seq: seq
+	      })
+	    }
+
+	    this.touchDown = function(seq, contact, x, y, pressure) {
+	      console.log('touchDown')
+	      sendOneWay('input.touchDown', {
+	        seq: seq
+	      , contact: contact
+	      , x: x
+	      , y: y
+	      , pressure: pressure
+	      })
+	    }
+
+	    this.touchMove = function(seq, contact, x, y, pressure) {
+	      console.log('touchMove')
+	      sendOneWay('input.touchMove', {
+	        seq: seq
+	      , contact: contact
+	      , x: x
+	      , y: y
+	      , pressure: pressure
+	      })
+	    }
+
+	    this.touchUp = function(seq, contact) {
+	      console.log('touchUp')
+	      sendOneWay('input.touchUp', {
+	        seq: seq
+	      , contact: contact
+	      })
+	    }
+
+	    this.touchCommit = function(seq) {
+	      console.log('touchCommit')
+	      sendOneWay('input.touchCommit', {
+	        seq: seq
+	      })
+	    }
+
+	    this.touchReset = function(seq) {
+	      sendOneWay('input.touchReset', {
+	        seq: seq
+	      })
+	    }
+	/*
+	    this.keyDown = keySender('input.keyDown')
+	    this.keyUp = keySender('input.keyUp')
+	    this.keyPress = keySender('input.keyPress')
+
+	    this.home = keySender('input.keyPress', 'home')
+	    this.menu = keySender('input.keyPress', 'menu')
+	    this.back = keySender('input.keyPress', 'back')
+
+	    this.type = function(text) {
+	      return sendOneWay('input.type', {
+	        text: text
+	      })
+	    }
+
+	    this.paste = function(text) {
+	      return sendTwoWay('clipboard.paste', {
+	        text: text
+	      })
+	    }
+
+	    this.copy = function() {
+	      return sendTwoWay('clipboard.copy')
+	    }
+
+	    //@TODO: Refactor this please
+	    var that = this
+	    this.getClipboardContent = function() {
+	      that.copy().then(function(result) {
+	        $rootScope.$apply(function() {
+	          if (result.success) {
+	            if (result.lastData) {
+	              that.clipboardContent = result.lastData
+	            } else {
+	              that.clipboardContent = gettext('No clipboard data')
+	            }
+	          } else {
+	            that.clipboardContent = gettext('Error while getting data')
+	          }
+	        })
+	      })
+	    }
+
+	    this.shell = function(command) {
+	      return sendTwoWay('shell.command', {
+	        command: command
+	      , timeout: 10000
+	      })
+	    }
+
+	    this.identify = function() {
+	      return sendTwoWay('device.identify')
+	    }
+
+	    this.install = function(options) {
+	      return sendTwoWay('device.install', options)
+	    }
+
+	    this.uninstall = function(pkg) {
+	      return sendTwoWay('device.uninstall', {
+	        packageName: pkg
+	      })
+	    }
+
+	    this.reboot = function() {
+	      return sendTwoWay('device.reboot')
+	    }
+
+	    this.rotate = function(rotation, lock) {
+	      return sendOneWay('display.rotate', {
+	        rotation: rotation,
+	        lock: lock
+	      })
+	    }
+
+	    this.testForward = function(forward) {
+	      return sendTwoWay('forward.test', {
+	        targetHost: forward.targetHost
+	      , targetPort: Number(forward.targetPort)
+	      })
+	    }
+
+	    this.createForward = function(forward) {
+	      return sendTwoWay('forward.create', {
+	        id: forward.id
+	      , devicePort: Number(forward.devicePort)
+	      , targetHost: forward.targetHost
+	      , targetPort: Number(forward.targetPort)
+	      })
+	    }
+
+	    this.removeForward = function(forward) {
+	      return sendTwoWay('forward.remove', {
+	        id: forward.id
+	      })
+	    }
+
+	    this.startLogcat = function(filters) {
+	      return sendTwoWay('logcat.start', {
+	        filters: filters
+	      })
+	    }
+
+	    this.stopLogcat = function() {
+	      return sendTwoWay('logcat.stop')
+	    }
+
+	    this.startRemoteConnect = function() {
+	      return sendTwoWay('connect.start')
+	    }
+
+	    this.stopRemoteConnect = function() {
+	      return sendTwoWay('connect.stop')
+	    }
+
+	    this.openBrowser = function(url, browser) {
+	      return sendTwoWay('browser.open', {
+	        url: url
+	      , browser: browser ? browser.id : null
+	      })
+	    }
+
+	    this.clearBrowser = function(browser) {
+	      return sendTwoWay('browser.clear', {
+	        browser: browser.id
+	      })
+	    }
+
+	    this.openStore = function() {
+	      return sendTwoWay('store.open')
+	    }
+
+	    this.screenshot = function() {
+	      return sendTwoWay('screen.capture')
+	    }
+
+	    this.fsretrieve = function(file) {
+	      return sendTwoWay('fs.retrieve', {
+	        file: file
+	      })
+	    }
+
+	    this.fslist = function(dir) {
+	      return sendTwoWay('fs.list', {
+	        dir: dir
+	      })
+	    }
+
+	    this.checkAccount = function(type, account) {
+	      return sendTwoWay('account.check', {
+	        type: type
+	      , account: account
+	      })
+	    }
+
+	    this.removeAccount = function(type, account) {
+	      return sendTwoWay('account.remove', {
+	        type: type
+	      , account: account
+	      })
+	    }
+
+	    this.addAccountMenu = function() {
+	      return sendTwoWay('account.addmenu')
+	    }
+
+	    this.addAccount = function(user, password) {
+	      return sendTwoWay('account.add', {
+	        user: user
+	      , password: password
+	      })
+	    }
+
+	    this.getAccounts = function(type) {
+	      return sendTwoWay('account.get', {
+	        type: type
+	      })
+	    }
+
+	    this.getSdStatus = function() {
+	      return sendTwoWay('sd.status')
+	    }
+
+	    this.setRingerMode = function(mode) {
+	      return sendTwoWay('ringer.set', {
+	        mode: mode
+	      })
+	    }
+
+	    this.getRingerMode = function() {
+	      return sendTwoWay('ringer.get')
+	    }
+
+	    this.setWifiEnabled = function(enabled) {
+	      return sendTwoWay('wifi.set', {
+	        enabled: enabled
+	      })
+	    }
+
+	    this.getWifiStatus = function() {
+	      return sendTwoWay('wifi.get')
+	    }
+
+	    window.cc = this
+	    */
+	  }
+
+	  controlService.create = function(target, channel) {
+	    return new ControlService(target, channel)
+	  }
+
+	  return controlService
+	}
+
+
+/***/ },
+/* 75 */
 /***/ function(module, exports) {
 
 	module.exports = (function(){
 	    return {
 	    templateUrl:'./modules/phone-detail/template.html',
 	    //template: 'TBD: Detail view for <span>{{$ctrl.device.serial}}</span><br/><debug-canvas></debug-canvas>',
-	    controller: ['$scope', '$routeParams','DeviceService','IdentityService','socket',
-	      function PhoneDetailController($scope, $routeParams, DeviceService, IdentityService, socket) {
+	    controller: ['$scope', '$routeParams','DeviceService','IdentityService','ControlService',
+	      function PhoneDetailController($scope, $routeParams, DeviceService, IdentityService, ControlService) {
 	        /*
 	        this.device = {
 	          serial : $routeParams.phoneId,
@@ -62015,14 +62798,14 @@
 	          height : 1080
 	        }
 	        */
+	        this.control = ControlService.create(IdentityService.device, IdentityService.device.serial)
 	        this.device = IdentityService.device
 	        this.onOpenScreenStream = function(){
-	          socket.emit('screen.stream.open', this.device.serial, {})
+	          this.control.screenStreamOpen()
 	        }
 
 	        this.onCloseScreenStream = function(){
-	          socket.emit('screen.stream.close', this.device.serial, {})
-	          
+	          this.control.screenStreamClose()
 	        }
 	      }
 	    ]

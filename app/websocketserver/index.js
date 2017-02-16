@@ -103,6 +103,51 @@ module.exports = function(options){
           push.send([deviceId, msgUtil.envelope(
                         new messageDefines.com.example.ponytail.testjeromq.ScreenStreamMessage(false))])
         })
+        socket.on('input.touchUp', function(deviceId, data){
+          push.send([
+            deviceId
+          , msgUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.TouchUpMessage(
+              data.seq
+            , data.contact
+            ))
+          ])
+
+        })
+        socket.on('input.touchDown', function(deviceId, data){
+          push.send([
+            deviceId
+          , msgUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.TouchDownMessage(
+              data.seq
+            , data.contact
+            , data.x
+            , data.y
+            , data.pressure
+            ))
+          ])
+          
+        })
+        socket.on('input.touchMove', function(deviceId, data){
+          push.send([
+            deviceId
+          , msgUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.TouchMoveMessage(
+              data.seq
+            , data.contact
+            , data.x
+            , data.y
+            , data.pressure
+            ))
+          ])
+          
+        })
+        socket.on('input.touchCommit', function(deviceId, data){
+          push.send([
+            deviceId
+          , msgUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.TouchCommitMessage(
+              data.seq
+            ))
+          ])
+          
+        })
         //设备按键
         socket.on('key', function(){
 

@@ -1,11 +1,13 @@
 module.exports = function ControlServiceFactory(
-  $upload
-, $http
+ /* $upload
+,*/ $http
 , socket
+/*
 , TransactionService
 , $rootScope
 , gettext
 , KeycodesMapped
+*/
 ) {
   var controlService = {
   }
@@ -14,7 +16,7 @@ module.exports = function ControlServiceFactory(
     function sendOneWay(action, data) {
       socket.emit(action, channel, data)
     }
-
+/*
     function sendTwoWay(action, data) {
       var tx = TransactionService.create(target)
       socket.emit(action, channel, tx.channel, data)
@@ -38,7 +40,13 @@ module.exports = function ControlServiceFactory(
         }
       }
     }
-
+*/
+    this.screenStreamOpen = function(){
+      sendOneWay('screen.stream.open')
+    }
+    this.screenStreamClose = function(){
+      sendOneWay('screen.stream.close')
+    }
     this.gestureStart = function(seq) {
       sendOneWay('input.gestureStart', {
         seq: seq
@@ -52,6 +60,7 @@ module.exports = function ControlServiceFactory(
     }
 
     this.touchDown = function(seq, contact, x, y, pressure) {
+      console.log('touchDown')
       sendOneWay('input.touchDown', {
         seq: seq
       , contact: contact
@@ -62,6 +71,7 @@ module.exports = function ControlServiceFactory(
     }
 
     this.touchMove = function(seq, contact, x, y, pressure) {
+      console.log('touchMove')
       sendOneWay('input.touchMove', {
         seq: seq
       , contact: contact
@@ -72,6 +82,7 @@ module.exports = function ControlServiceFactory(
     }
 
     this.touchUp = function(seq, contact) {
+      console.log('touchUp')
       sendOneWay('input.touchUp', {
         seq: seq
       , contact: contact
@@ -79,6 +90,7 @@ module.exports = function ControlServiceFactory(
     }
 
     this.touchCommit = function(seq) {
+      console.log('touchCommit')
       sendOneWay('input.touchCommit', {
         seq: seq
       })
@@ -89,7 +101,7 @@ module.exports = function ControlServiceFactory(
         seq: seq
       })
     }
-
+/*
     this.keyDown = keySender('input.keyDown')
     this.keyUp = keySender('input.keyUp')
     this.keyPress = keySender('input.keyPress')
@@ -293,6 +305,7 @@ module.exports = function ControlServiceFactory(
     }
 
     window.cc = this
+    */
   }
 
   controlService.create = function(target, channel) {

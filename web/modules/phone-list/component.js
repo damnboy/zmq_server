@@ -30,12 +30,14 @@ module.exports = (function(){
          phones.forEach(function(phone){
            if(phone.serial === serial){
              IdentityService.device = phone;
+             /*
              if(phone.usable === false){
                alert('offline');
              }
              else{
                alert('online');
              }
+             */
            }
          })
        }

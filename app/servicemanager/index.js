@@ -18,6 +18,30 @@ module.exports = function(options){
             .on(messageDefines.com.example.ponytail.testjeromq.ScreenStreamMessage, function(deviceId, screenStreamMessage){
                 devdealer.send([deviceId, messageUtil.envelope(screenStreamMessage)])
             })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchMoveMessage, function(deviceId, touchMoveMessage){
+                //log.info('TouchDownMessage')
+                //console.log(deviceId)
+                //console.log(touchDownMessage)
+                devdealer.send([deviceId, messageUtil.envelope(touchMoveMessage)])
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchUpMessage, function(deviceId, touchUpMessage){
+                //log.info('TouchDownMessage')
+                //console.log(deviceId)
+                //console.log(touchDownMessage)
+                devdealer.send([deviceId, messageUtil.envelope(touchUpMessage)])
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchDownMessage, function(deviceId, touchDownMessage){
+                //log.info('TouchDownMessage')
+                //console.log(deviceId)
+                //console.log(touchDownMessage)
+                devdealer.send([deviceId, messageUtil.envelope(touchDownMessage)])
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchCommitMessage, function(deviceId, touchCommitMessage){
+                //log.info('TouchCommitMessage')
+                //console.log(deviceId)
+                //console.log(touchCommitMessage)
+                devdealer.send([deviceId, messageUtil.envelope(touchCommitMessage)])
+            })
             .generalHandler(deviceId, networkenvelop)
     })
 
