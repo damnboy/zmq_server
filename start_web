@@ -1,0 +1,4 @@
+#!/bin/sh
+rm /Users/ponytail/Library/Caches/Google/Chrome/Default/Cache/*
+webpack
+http-server ./web

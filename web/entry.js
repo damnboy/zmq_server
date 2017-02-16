@@ -50,7 +50,7 @@
 	__webpack_require__(5)
 	__webpack_require__(8)
 	__webpack_require__(16)
-	__webpack_require__(63)
+	__webpack_require__(67)
 	var phonecatApp = angular
 	.module('phonecatApp', [
 	  'ngRoute'
@@ -89,8 +89,8 @@
 /***/ function(module, exports) {
 
 	/**
-	 * @license AngularJS v1.5.11
-	 * (c) 2010-2017 Google, Inc. http://angularjs.org
+	 * @license AngularJS v1.5.10
+	 * (c) 2010-2016 Google, Inc. http://angularjs.org
 	 * License: MIT
 	 */
 	(function(window) {'use strict';
@@ -147,7 +147,7 @@
 	      return match;
 	    });
 
-	    message += '\nhttp://errors.angularjs.org/1.5.11/' +
+	    message += '\nhttp://errors.angularjs.org/1.5.10/' +
 	      (module ? module + '/' : '') + code;
 
 	    for (i = SKIP_INDEXES, paramPrefix = '?'; i < templateArgs.length; i++, paramPrefix = '&') {
@@ -1605,16 +1605,12 @@
 	}
 
 	function allowAutoBootstrap(document) {
-	  var script = document.currentScript;
-	  var src = script && script.getAttribute('src');
-
-	  if (!src) {
+	  if (!document.currentScript) {
 	    return true;
 	  }
-
+	  var src = document.currentScript.getAttribute('src');
 	  var link = document.createElement('a');
 	  link.href = src;
-
 	  if (document.location.origin === link.origin) {
 	    // Same-origin resources are always allowed, even for non-whitelisted schemes.
 	    return true;
@@ -2661,11 +2657,11 @@
 	var version = {
 	  // These placeholder strings will be replaced by grunt's `build` task.
 	  // They need to be double- or single-quoted.
-	  full: '1.5.11',
+	  full: '1.5.10',
 	  major: 1,
 	  minor: 5,
-	  dot: 11,
-	  codeName: 'princely-quest'
+	  dot: 10,
+	  codeName: 'asynchronous-synchronization'
 	};
 
 
@@ -7837,7 +7833,7 @@
 	  var bindingCache = createMap();
 
 	  function parseIsolateBindings(scope, directiveName, isController) {
-	    var LOCAL_REGEXP = /^\s*([@&<]|=(\*?))(\??)\s*([\w$]*)\s*$/;
+	    var LOCAL_REGEXP = /^\s*([@&<]|=(\*?))(\??)\s*(\w*)\s*$/;
 
 	    var bindings = createMap();
 
@@ -14194,7 +14190,7 @@
 	  this.debugEnabled = function(flag) {
 	    if (isDefined(flag)) {
 	      debug = flag;
-	      return this;
+	    return this;
 	    } else {
 	      return debug;
 	    }
@@ -20228,14 +20224,6 @@
 	  var lastCookies = {};
 	  var lastCookieString = '';
 
-	  function safeGetCookie(rawDocument) {
-	    try {
-	      return rawDocument.cookie || '';
-	    } catch (e) {
-	      return '';
-	    }
-	  }
-
 	  function safeDecodeURIComponent(str) {
 	    try {
 	      return decodeURIComponent(str);
@@ -20246,7 +20234,7 @@
 
 	  return function() {
 	    var cookieArray, cookie, i, index, name;
-	    var currentCookieString = safeGetCookie(rawDocument);
+	    var currentCookieString = rawDocument.cookie || '';
 
 	    if (currentCookieString !== lastCookieString) {
 	      lastCookieString = currentCookieString;
@@ -30755,13 +30743,11 @@
 	 * @multiElement
 	 *
 	 * @description
-	 * The `ngShow` directive shows or hides the given HTML element based on the expression provided to
-	 * the `ngShow` attribute.
-	 *
-	 * The element is shown or hidden by removing or adding the `.ng-hide` CSS class onto the element.
-	 * The `.ng-hide` CSS class is predefined in AngularJS and sets the display style to none (using an
-	 * `!important` flag). For CSP mode please add `angular-csp.css` to your HTML file (see
-	 * {@link ng.directive:ngCsp ngCsp}).
+	 * The `ngShow` directive shows or hides the given HTML element based on the expression
+	 * provided to the `ngShow` attribute. The element is shown or hidden by removing or adding
+	 * the `.ng-hide` CSS class onto the element. The `.ng-hide` CSS class is predefined
+	 * in AngularJS and sets the display style to none (using an !important flag).
+	 * For CSP mode please add `angular-csp.css` to your html file (see {@link ng.directive:ngCsp ngCsp}).
 	 *
 	 * ```html
 	 * <!-- when $scope.myValue is truthy (element is visible) -->
@@ -30771,32 +30757,31 @@
 	 * <div ng-show="myValue" class="ng-hide"></div>
 	 * ```
 	 *
-	 * When the `ngShow` expression evaluates to a falsy value then the `.ng-hide` CSS class is added
-	 * to the class attribute on the element causing it to become hidden. When truthy, the `.ng-hide`
-	 * CSS class is removed from the element causing the element not to appear hidden.
+	 * When the `ngShow` expression evaluates to a falsy value then the `.ng-hide` CSS class is added to the class
+	 * attribute on the element causing it to become hidden. When truthy, the `.ng-hide` CSS class is removed
+	 * from the element causing the element not to appear hidden.
 	 *
-	 * ## Why is `!important` used?
+	 * ## Why is !important used?
 	 *
-	 * You may be wondering why `!important` is used for the `.ng-hide` CSS class. This is because the
-	 * `.ng-hide` selector can be easily overridden by heavier selectors. For example, something as
-	 * simple as changing the display style on a HTML list item would make hidden elements appear
-	 * visible. This also becomes a bigger issue when dealing with CSS frameworks.
+	 * You may be wondering why !important is used for the `.ng-hide` CSS class. This is because the `.ng-hide` selector
+	 * can be easily overridden by heavier selectors. For example, something as simple
+	 * as changing the display style on a HTML list item would make hidden elements appear visible.
+	 * This also becomes a bigger issue when dealing with CSS frameworks.
 	 *
-	 * By using `!important`, the show and hide behavior will work as expected despite any clash between
-	 * CSS selector specificity (when `!important` isn't used with any conflicting styles). If a
-	 * developer chooses to override the styling to change how to hide an element then it is just a
-	 * matter of using `!important` in their own CSS code.
+	 * By using !important, the show and hide behavior will work as expected despite any clash between CSS selector
+	 * specificity (when !important isn't used with any conflicting styles). If a developer chooses to override the
+	 * styling to change how to hide an element then it is just a matter of using !important in their own CSS code.
 	 *
 	 * ### Overriding `.ng-hide`
 	 *
-	 * By default, the `.ng-hide` class will style the element with `display: none !important`. If you
-	 * wish to change the hide behavior with `ngShow`/`ngHide`, you can simply overwrite the styles for
-	 * the `.ng-hide` CSS class. Note that the selector that needs to be used is actually
-	 * `.ng-hide:not(.ng-hide-animate)` to cope with extra animation classes that can be added.
+	 * By default, the `.ng-hide` class will style the element with `display: none!important`. If you wish to change
+	 * the hide behavior with ngShow/ngHide then this can be achieved by restating the styles for the `.ng-hide`
+	 * class CSS. Note that the selector that needs to be used is actually `.ng-hide:not(.ng-hide-animate)` to cope
+	 * with extra animation classes that can be added.
 	 *
 	 * ```css
 	 * .ng-hide:not(.ng-hide-animate) {
-	 *   /&#42; These are just alternative ways of hiding an element &#42;/
+	 *   /&#42; this is just another form of hiding an element &#42;/
 	 *   display: block!important;
 	 *   position: absolute;
 	 *   top: -9999px;
@@ -30804,20 +30789,29 @@
 	 * }
 	 * ```
 	 *
-	 * By default you don't need to override anything in CSS and the animations will work around the
-	 * display style.
+	 * By default you don't need to override in CSS anything and the animations will work around the display style.
 	 *
 	 * ## A note about animations with `ngShow`
 	 *
-	 * Animations in `ngShow`/`ngHide` work with the show and hide events that are triggered when the
-	 * directive expression is true and false. This system works like the animation system present with
-	 * `ngClass` except that you must also include the `!important` flag to override the display
-	 * property so that the elements are not actually hidden during the animation.
+	 * Animations in ngShow/ngHide work with the show and hide events that are triggered when the directive expression
+	 * is true and false. This system works like the animation system present with ngClass except that
+	 * you must also include the !important flag to override the display property
+	 * so that you can perform an animation when the element is hidden during the time of the animation.
 	 *
 	 * ```css
-	 * /&#42; A working example can be found at the bottom of this page. &#42;/
+	 * //
+	 * //a working example can be found at the bottom of this page
+	 * //
 	 * .my-element.ng-hide-add, .my-element.ng-hide-remove {
-	 *   transition: all 0.5s linear;
+	 *   /&#42; this is required as of 1.3x to properly
+	 *      apply all styling in a show/hide animation &#42;/
+	 *   transition: 0s linear all;
+	 * }
+	 *
+	 * .my-element.ng-hide-add-active,
+	 * .my-element.ng-hide-remove-active {
+	 *   /&#42; the transition is defined in the active class &#42;/
+	 *   transition: 1s linear all;
 	 * }
 	 *
 	 * .my-element.ng-hide-add { ... }
@@ -30826,108 +30820,76 @@
 	 * .my-element.ng-hide-remove.ng-hide-remove-active { ... }
 	 * ```
 	 *
-	 * Keep in mind that, as of AngularJS version 1.3, there is no need to change the display property
-	 * to block during animation states - ngAnimate will automatically handle the style toggling for you.
+	 * Keep in mind that, as of AngularJS version 1.3, there is no need to change the display
+	 * property to block during animation states--ngAnimate will handle the style toggling automatically for you.
 	 *
 	 * @animations
-	 * | Animation                                           | Occurs                                                                                                        |
-	 * |-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-	 * | {@link $animate#addClass addClass} `.ng-hide`       | After the `ngShow` expression evaluates to a non truthy value and just before the contents are set to hidden. |
-	 * | {@link $animate#removeClass removeClass} `.ng-hide` | After the `ngShow` expression evaluates to a truthy value and just before contents are set to visible.        |
+	 * | Animation                        | Occurs                              |
+	 * |----------------------------------|-------------------------------------|
+	 * | {@link $animate#addClass addClass} `.ng-hide`  | after the `ngShow` expression evaluates to a non truthy value and just before the contents are set to hidden |
+	 * | {@link $animate#removeClass removeClass}  `.ng-hide`  | after the `ngShow` expression evaluates to a truthy value and just before contents are set to visible |
 	 *
 	 * @element ANY
-	 * @param {expression} ngShow If the {@link guide/expression expression} is truthy/falsy then the
-	 *                            element is shown/hidden respectively.
+	 * @param {expression} ngShow If the {@link guide/expression expression} is truthy
+	 *     then the element is shown or hidden respectively.
 	 *
 	 * @example
-	 * A simple example, animating the element's opacity:
-	 *
-	  <example module="ngAnimate" deps="angular-animate.js" animations="true" name="ng-show-simple">
+	  <example module="ngAnimate" deps="angular-animate.js" animations="true" name="ng-show">
 	    <file name="index.html">
-	      Show: <input type="checkbox" ng-model="checked" aria-label="Toggle ngShow"><br />
-	      <div class="check-element animate-show-hide" ng-show="checked">
-	        I show up when your checkbox is checked.
+	      Click me: <input type="checkbox" ng-model="checked" aria-label="Toggle ngHide"><br/>
+	      <div>
+	        Show:
+	        <div class="check-element animate-show" ng-show="checked">
+	          <span class="glyphicon glyphicon-thumbs-up"></span> I show up when your checkbox is checked.
+	        </div>
+	      </div>
+	      <div>
+	        Hide:
+	        <div class="check-element animate-show" ng-hide="checked">
+	          <span class="glyphicon glyphicon-thumbs-down"></span> I hide when your checkbox is checked.
+	        </div>
 	      </div>
 	    </file>
+	    <file name="glyphicons.css">
+	      @import url(../../components/bootstrap-3.1.1/css/bootstrap.css);
+	    </file>
 	    <file name="animations.css">
-	      .animate-show-hide.ng-hide {
-	        opacity: 0;
+	      .animate-show {
+	        line-height: 20px;
+	        opacity: 1;
+	        padding: 10px;
+	        border: 1px solid black;
+	        background: white;
 	      }
 
-	      .animate-show-hide.ng-hide-add,
-	      .animate-show-hide.ng-hide-remove {
+	      .animate-show.ng-hide-add, .animate-show.ng-hide-remove {
 	        transition: all linear 0.5s;
 	      }
 
-	      .check-element {
-	        border: 1px solid black;
-	        opacity: 1;
-	        padding: 10px;
-	      }
-	    </file>
-	    <file name="protractor.js" type="protractor">
-	      it('should check ngShow', function() {
-	        var checkbox = element(by.model('checked'));
-	        var checkElem = element(by.css('.check-element'));
-
-	        expect(checkElem.isDisplayed()).toBe(false);
-	        checkbox.click();
-	        expect(checkElem.isDisplayed()).toBe(true);
-	      });
-	    </file>
-	  </example>
-	 *
-	 * <hr />
-	 * @example
-	 * A more complex example, featuring different show/hide animations:
-	 *
-	  <example module="ngAnimate" deps="angular-animate.js" animations="true" name="ng-show-complex">
-	    <file name="index.html">
-	      Show: <input type="checkbox" ng-model="checked" aria-label="Toggle ngShow"><br />
-	      <div class="check-element funky-show-hide" ng-show="checked">
-	        I show up when your checkbox is checked.
-	      </div>
-	    </file>
-	    <file name="animations.css">
-	      body {
-	        overflow: hidden;
-	        perspective: 1000px;
-	      }
-
-	      .funky-show-hide.ng-hide-add {
-	        transform: rotateZ(0);
-	        transform-origin: right;
-	        transition: all 0.5s ease-in-out;
-	      }
-
-	      .funky-show-hide.ng-hide-add.ng-hide-add-active {
-	        transform: rotateZ(-135deg);
-	      }
-
-	      .funky-show-hide.ng-hide-remove {
-	        transform: rotateY(90deg);
-	        transform-origin: left;
-	        transition: all 0.5s ease;
-	      }
-
-	      .funky-show-hide.ng-hide-remove.ng-hide-remove-active {
-	        transform: rotateY(0);
+	      .animate-show.ng-hide {
+	        line-height: 0;
+	        opacity: 0;
+	        padding: 0 10px;
 	      }
 
 	      .check-element {
-	        border: 1px solid black;
-	        opacity: 1;
 	        padding: 10px;
+	        border: 1px solid black;
+	        background: white;
 	      }
 	    </file>
 	    <file name="protractor.js" type="protractor">
-	      it('should check ngShow', function() {
-	        var checkbox = element(by.model('checked'));
-	        var checkElem = element(by.css('.check-element'));
+	      var thumbsUp = element(by.css('span.glyphicon-thumbs-up'));
+	      var thumbsDown = element(by.css('span.glyphicon-thumbs-down'));
 
-	        expect(checkElem.isDisplayed()).toBe(false);
-	        checkbox.click();
-	        expect(checkElem.isDisplayed()).toBe(true);
+	      it('should check ng-show / ng-hide', function() {
+	        expect(thumbsUp.isDisplayed()).toBeFalsy();
+	        expect(thumbsDown.isDisplayed()).toBeTruthy();
+
+	        element(by.model('checked')).click();
+
+	        expect(thumbsUp.isDisplayed()).toBeTruthy();
+	        expect(thumbsDown.isDisplayed()).toBeFalsy();
 	      });
 	    </file>
 	  </example>
@@ -30957,13 +30919,11 @@
 	 * @multiElement
 	 *
 	 * @description
-	 * The `ngHide` directive shows or hides the given HTML element based on the expression provided to
-	 * the `ngHide` attribute.
-	 *
-	 * The element is shown or hidden by removing or adding the `.ng-hide` CSS class onto the element.
-	 * The `.ng-hide` CSS class is predefined in AngularJS and sets the display style to none (using an
-	 * `!important` flag). For CSP mode please add `angular-csp.css` to your HTML file (see
-	 * {@link ng.directive:ngCsp ngCsp}).
+	 * The `ngHide` directive shows or hides the given HTML element based on the expression
+	 * provided to the `ngHide` attribute. The element is shown or hidden by removing or adding
+	 * the `ng-hide` CSS class onto the element. The `.ng-hide` CSS class is predefined
+	 * in AngularJS and sets the display style to none (using an !important flag).
+	 * For CSP mode please add `angular-csp.css` to your html file (see {@link ng.directive:ngCsp ngCsp}).
 	 *
 	 * ```html
 	 * <!-- when $scope.myValue is truthy (element is hidden) -->
@@ -30973,32 +30933,30 @@
 	 * <div ng-hide="myValue"></div>
 	 * ```
 	 *
-	 * When the `ngHide` expression evaluates to a truthy value then the `.ng-hide` CSS class is added
-	 * to the class attribute on the element causing it to become hidden. When falsy, the `.ng-hide`
-	 * CSS class is removed from the element causing the element not to appear hidden.
+	 * When the `ngHide` expression evaluates to a truthy value then the `.ng-hide` CSS class is added to the class
+	 * attribute on the element causing it to become hidden. When falsy, the `.ng-hide` CSS class is removed
+	 * from the element causing the element not to appear hidden.
 	 *
-	 * ## Why is `!important` used?
+	 * ## Why is !important used?
 	 *
-	 * You may be wondering why `!important` is used for the `.ng-hide` CSS class. This is because the
-	 * `.ng-hide` selector can be easily overridden by heavier selectors. For example, something as
-	 * simple as changing the display style on a HTML list item would make hidden elements appear
-	 * visible. This also becomes a bigger issue when dealing with CSS frameworks.
+	 * You may be wondering why !important is used for the `.ng-hide` CSS class. This is because the `.ng-hide` selector
+	 * can be easily overridden by heavier selectors. For example, something as simple
+	 * as changing the display style on a HTML list item would make hidden elements appear visible.
+	 * This also becomes a bigger issue when dealing with CSS frameworks.
 	 *
-	 * By using `!important`, the show and hide behavior will work as expected despite any clash between
-	 * CSS selector specificity (when `!important` isn't used with any conflicting styles). If a
-	 * developer chooses to override the styling to change how to hide an element then it is just a
-	 * matter of using `!important` in their own CSS code.
+	 * By using !important, the show and hide behavior will work as expected despite any clash between CSS selector
+	 * specificity (when !important isn't used with any conflicting styles). If a developer chooses to override the
+	 * styling to change how to hide an element then it is just a matter of using !important in their own CSS code.
 	 *
 	 * ### Overriding `.ng-hide`
 	 *
-	 * By default, the `.ng-hide` class will style the element with `display: none !important`. If you
-	 * wish to change the hide behavior with `ngShow`/`ngHide`, you can simply overwrite the styles for
-	 * the `.ng-hide` CSS class. Note that the selector that needs to be used is actually
-	 * `.ng-hide:not(.ng-hide-animate)` to cope with extra animation classes that can be added.
+	 * By default, the `.ng-hide` class will style the element with `display: none!important`. If you wish to change
+	 * the hide behavior with ngShow/ngHide then this can be achieved by restating the styles for the `.ng-hide`
+	 * class in CSS:
 	 *
 	 * ```css
-	 * .ng-hide:not(.ng-hide-animate) {
-	 *   /&#42; These are just alternative ways of hiding an element &#42;/
+	 * .ng-hide {
+	 *   /&#42; this is just another form of hiding an element &#42;/
 	 *   display: block!important;
 	 *   position: absolute;
 	 *   top: -9999px;
@@ -31006,20 +30964,20 @@
 	 * }
 	 * ```
 	 *
-	 * By default you don't need to override in CSS anything and the animations will work around the
-	 * display style.
+	 * By default you don't need to override in CSS anything and the animations will work around the display style.
 	 *
 	 * ## A note about animations with `ngHide`
 	 *
-	 * Animations in `ngShow`/`ngHide` work with the show and hide events that are triggered when the
-	 * directive expression is true and false. This system works like the animation system present with
-	 * `ngClass` except that you must also include the `!important` flag to override the display
-	 * property so that the elements are not actually hidden during the animation.
+	 * Animations in ngShow/ngHide work with the show and hide events that are triggered when the directive expression
+	 * is true and false. This system works like the animation system present with ngClass, except that the `.ng-hide`
+	 * CSS class is added and removed for you instead of your own CSS class.
 	 *
 	 * ```css
-	 * /&#42; A working example can be found at the bottom of this page. &#42;/
+	 * //
+	 * //a working example can be found at the bottom of this page
+	 * //
 	 * .my-element.ng-hide-add, .my-element.ng-hide-remove {
-	 *   transition: all 0.5s linear;
+	 *   transition: 0.5s linear all;
 	 * }
 	 *
 	 * .my-element.ng-hide-add { ... }
@@ -31028,109 +30986,74 @@
 	 * .my-element.ng-hide-remove.ng-hide-remove-active { ... }
 	 * ```
 	 *
-	 * Keep in mind that, as of AngularJS version 1.3, there is no need to change the display property
-	 * to block during animation states - ngAnimate will automatically handle the style toggling for you.
+	 * Keep in mind that, as of AngularJS version 1.3, there is no need to change the display
+	 * property to block during animation states--ngAnimate will handle the style toggling automatically for you.
 	 *
 	 * @animations
-	 * | Animation                                           | Occurs                                                                                                     |
-	 * |-----------------------------------------------------|------------------------------------------------------------------------------------------------------------|
-	 * | {@link $animate#addClass addClass} `.ng-hide`       | After the `ngHide` expression evaluates to a truthy value and just before the contents are set to hidden.  |
-	 * | {@link $animate#removeClass removeClass} `.ng-hide` | After the `ngHide` expression evaluates to a non truthy value and just before contents are set to visible. |
+	 * | Animation                        | Occurs                              |
+	 * |----------------------------------|-------------------------------------|
+	 * | {@link $animate#addClass addClass} `.ng-hide`  | after the `ngHide` expression evaluates to a truthy value and just before the contents are set to hidden |
+	 * | {@link $animate#removeClass removeClass}  `.ng-hide`  | after the `ngHide` expression evaluates to a non truthy value and just before contents are set to visible |
 	 *
 	 *
 	 * @element ANY
-	 * @param {expression} ngHide If the {@link guide/expression expression} is truthy/falsy then the
-	 *                            element is hidden/shown respectively.
+	 * @param {expression} ngHide If the {@link guide/expression expression} is truthy then
+	 *     the element is shown or hidden respectively.
 	 *
 	 * @example
-	 * A simple example, animating the element's opacity:
-	 *
-	  <example module="ngAnimate" deps="angular-animate.js" animations="true" name="ng-hide-simple">
+	  <example module="ngAnimate" deps="angular-animate.js" animations="true" name="ng-hide">
 	    <file name="index.html">
-	      Hide: <input type="checkbox" ng-model="checked" aria-label="Toggle ngHide"><br />
-	      <div class="check-element animate-show-hide" ng-hide="checked">
-	        I hide when your checkbox is checked.
+	      Click me: <input type="checkbox" ng-model="checked" aria-label="Toggle ngShow"><br/>
+	      <div>
+	        Show:
+	        <div class="check-element animate-hide" ng-show="checked">
+	          <span class="glyphicon glyphicon-thumbs-up"></span> I show up when your checkbox is checked.
+	        </div>
+	      </div>
+	      <div>
+	        Hide:
+	        <div class="check-element animate-hide" ng-hide="checked">
+	          <span class="glyphicon glyphicon-thumbs-down"></span> I hide when your checkbox is checked.
+	        </div>
 	      </div>
 	    </file>
+	    <file name="glyphicons.css">
+	      @import url(../../components/bootstrap-3.1.1/css/bootstrap.css);
+	    </file>
 	    <file name="animations.css">
-	      .animate-show-hide.ng-hide {
-	        opacity: 0;
-	      }
-
-	      .animate-show-hide.ng-hide-add,
-	      .animate-show-hide.ng-hide-remove {
+	      .animate-hide {
 	        transition: all linear 0.5s;
+	        line-height: 20px;
+	        opacity: 1;
+	        padding: 10px;
+	        border: 1px solid black;
+	        background: white;
+	      }
+
+	      .animate-hide.ng-hide {
+	        line-height: 0;
+	        opacity: 0;
+	        padding: 0 10px;
 	      }
 
 	      .check-element {
-	        border: 1px solid black;
-	        opacity: 1;
 	        padding: 10px;
+	        border: 1px solid black;
+	        background: white;
 	      }
 	    </file>
 	    <file name="protractor.js" type="protractor">
-	      it('should check ngHide', function() {
-	        var checkbox = element(by.model('checked'));
-	        var checkElem = element(by.css('.check-element'));
+	      var thumbsUp = element(by.css('span.glyphicon-thumbs-up'));
+	      var thumbsDown = element(by.css('span.glyphicon-thumbs-down'));
 
-	        expect(checkElem.isDisplayed()).toBe(true);
-	        checkbox.click();
-	        expect(checkElem.isDisplayed()).toBe(false);
-	      });
-	    </file>
-	  </example>
-	 *
-	 * <hr />
-	 * @example
-	 * A more complex example, featuring different show/hide animations:
-	 *
-	  <example module="ngAnimate" deps="angular-animate.js" animations="true" name="ng-hide-complex">
-	    <file name="index.html">
-	      Hide: <input type="checkbox" ng-model="checked" aria-label="Toggle ngHide"><br />
-	      <div class="check-element funky-show-hide" ng-hide="checked">
-	        I hide when your checkbox is checked.
-	      </div>
-	    </file>
-	    <file name="animations.css">
-	      body {
-	        overflow: hidden;
-	        perspective: 1000px;
-	      }
+	      it('should check ng-show / ng-hide', function() {
+	        expect(thumbsUp.isDisplayed()).toBeFalsy();
+	        expect(thumbsDown.isDisplayed()).toBeTruthy();
 
-	      .funky-show-hide.ng-hide-add {
-	        transform: rotateZ(0);
-	        transform-origin: right;
-	        transition: all 0.5s ease-in-out;
-	      }
+	        element(by.model('checked')).click();
 
-	      .funky-show-hide.ng-hide-add.ng-hide-add-active {
-	        transform: rotateZ(-135deg);
-	      }
-
-	      .funky-show-hide.ng-hide-remove {
-	        transform: rotateY(90deg);
-	        transform-origin: left;
-	        transition: all 0.5s ease;
-	      }
-
-	      .funky-show-hide.ng-hide-remove.ng-hide-remove-active {
-	        transform: rotateY(0);
-	      }
-
-	      .check-element {
-	        border: 1px solid black;
-	        opacity: 1;
-	        padding: 10px;
-	      }
-	    </file>
-	    <file name="protractor.js" type="protractor">
-	      it('should check ngHide', function() {
-	        var checkbox = element(by.model('checked'));
-	        var checkElem = element(by.css('.check-element'));
-
-	        expect(checkElem.isDisplayed()).toBe(true);
-	        checkbox.click();
-	        expect(checkElem.isDisplayed()).toBe(false);
+	        expect(thumbsUp.isDisplayed()).toBeTruthy();
+	        expect(thumbsDown.isDisplayed()).toBeFalsy();
 	      });
 	    </file>
 	  </example>
@@ -32723,8 +32646,8 @@
 /***/ function(module, exports) {
 
 	/**
-	 * @license AngularJS v1.5.11
-	 * (c) 2010-2017 Google, Inc. http://angularjs.org
+	 * @license AngularJS v1.5.10
+	 * (c) 2010-2016 Google, Inc. http://angularjs.org
 	 * License: MIT
 	 */
 	(function(window, angular) {'use strict';
@@ -33855,12 +33778,14 @@
 	         phones.forEach(function(phone){
 	           if(phone.serial === serial){
 	             IdentityService.device = phone;
+	             /*
 	             if(phone.usable === false){
 	               alert('offline');
 	             }
 	             else{
 	               alert('online');
 	             }
+	             */
 	           }
 	         })
 	       }
@@ -54343,8 +54268,8 @@
 	 */
 
 	var url = __webpack_require__(19);
-	var parser = __webpack_require__(23);
-	var Manager = __webpack_require__(30);
+	var parser = __webpack_require__(24);
+	var Manager = __webpack_require__(31);
 	var debug = __webpack_require__(21)('socket.io-client');
 
 	/**
@@ -54427,8 +54352,8 @@
 	 * @api public
 	 */
 
-	exports.Manager = __webpack_require__(30);
-	exports.Socket = __webpack_require__(56);
+	exports.Manager = __webpack_require__(31);
+	exports.Socket = __webpack_require__(59);
 
 
 /***/ },
@@ -54563,56 +54488,512 @@
 /* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
-	angular.module('debug', [
-	    __webpack_require__(22).name,
-	])
+	
+	/**
+	 * This is the web browser implementation of `debug()`.
+	 *
+	 * Expose `debug()` as the module.
+	 */
 
-	module.exports.name = 'debug'
+	exports = module.exports = __webpack_require__(22);
+	exports.log = log;
+	exports.formatArgs = formatArgs;
+	exports.save = save;
+	exports.load = load;
+	exports.useColors = useColors;
+	exports.storage = 'undefined' != typeof chrome
+	               && 'undefined' != typeof chrome.storage
+	                  ? chrome.storage.local
+	                  : localstorage();
+
+	/**
+	 * Colors.
+	 */
+
+	exports.colors = [
+	  'lightseagreen',
+	  'forestgreen',
+	  'goldenrod',
+	  'dodgerblue',
+	  'darkorchid',
+	  'crimson'
+	];
+
+	/**
+	 * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+	 * and the Firebug extension (any Firefox version) are known
+	 * to support "%c" CSS customizations.
+	 *
+	 * TODO: add a `localStorage` variable to explicitly enable/disable colors
+	 */
+
+	function useColors() {
+	  // is webkit? http://stackoverflow.com/a/16459606/376773
+	  return ('WebkitAppearance' in document.documentElement.style) ||
+	    // is firebug? http://stackoverflow.com/a/398120/376773
+	    (window.console && (console.firebug || (console.exception && console.table))) ||
+	    // is firefox >= v31?
+	    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+	    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
+	}
+
+	/**
+	 * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+	 */
+
+	exports.formatters.j = function(v) {
+	  return JSON.stringify(v);
+	};
 
 
+	/**
+	 * Colorize log arguments if enabled.
+	 *
+	 * @api public
+	 */
+
+	function formatArgs() {
+	  var args = arguments;
+	  var useColors = this.useColors;
+
+	  args[0] = (useColors ? '%c' : '')
+	    + this.namespace
+	    + (useColors ? ' %c' : ' ')
+	    + args[0]
+	    + (useColors ? '%c ' : ' ')
+	    + '+' + exports.humanize(this.diff);
+
+	  if (!useColors) return args;
+
+	  var c = 'color: ' + this.color;
+	  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
+
+	  // the final "%c" is somewhat tricky, because there could be other
+	  // arguments passed either before or after the %c, so we need to
+	  // figure out the correct index to insert the CSS into
+	  var index = 0;
+	  var lastC = 0;
+	  args[0].replace(/%[a-z%]/g, function(match) {
+	    if ('%%' === match) return;
+	    index++;
+	    if ('%c' === match) {
+	      // we only are interested in the *last* %c
+	      // (the user may have provided their own)
+	      lastC = index;
+	    }
+	  });
+
+	  args.splice(lastC, 0, c);
+	  return args;
+	}
+
+	/**
+	 * Invokes `console.log()` when available.
+	 * No-op when `console.log` is not a "function".
+	 *
+	 * @api public
+	 */
+
+	function log() {
+	  // this hackery is required for IE8/9, where
+	  // the `console.log` function doesn't have 'apply'
+	  return 'object' === typeof console
+	    && console.log
+	    && Function.prototype.apply.call(console.log, console, arguments);
+	}
+
+	/**
+	 * Save `namespaces`.
+	 *
+	 * @param {String} namespaces
+	 * @api private
+	 */
+
+	function save(namespaces) {
+	  try {
+	    if (null == namespaces) {
+	      exports.storage.removeItem('debug');
+	    } else {
+	      exports.storage.debug = namespaces;
+	    }
+	  } catch(e) {}
+	}
+
+	/**
+	 * Load `namespaces`.
+	 *
+	 * @return {String} returns the previously persisted debug modes
+	 * @api private
+	 */
+
+	function load() {
+	  var r;
+	  try {
+	    r = exports.storage.debug;
+	  } catch(e) {}
+	  return r;
+	}
+
+	/**
+	 * Enable namespaces listed in `localStorage.debug` initially.
+	 */
+
+	exports.enable(load());
+
+	/**
+	 * Localstorage attempts to return the localstorage.
+	 *
+	 * This is necessary because safari throws
+	 * when a user disables cookies/localstorage
+	 * and you attempt to access it.
+	 *
+	 * @return {LocalStorage}
+	 * @api private
+	 */
+
+	function localstorage(){
+	  try {
+	    return window.localStorage;
+	  } catch (e) {}
+	}
 
 
 /***/ },
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(3)
-	angular.module('debugCanvas', [
-	  'ngRoute'
-	])
-	.factory('colorBlack', function(){
-	    return {
-	        index: 0,
-	        table: ['#000000','#272727','#3C3C3C','#4F4F4F','#5B5B5B','#6C6C6C','#7B7B7B','#8E8E8E','#9D9D9D','#ADADAD','#BEBEBE','#D0D0D0','#E0E0E0','#F0F0F0','#FCFCFC','#FFFFFF'],
-	        getNext : function(){
-	        if(this.index === this.table.length){
-	          this.index = 1;
-	        }
-	        var ret_color = this.table[this.index];
-	        this.index = this.index + 1;
-	        return ret_color;
-	      }
-	    }
-	})
-	.component('debugCanvas', {
-	    template : '<canvas></canvas>',
-	    controller : function($scope, $element, $attrs, colorBlack){
-	        var canvas = $element.find('canvas')[0];
-	        canvas.height = 800;
-	        canvas.width = 600;
-	        setInterval(function(){
-	            var ctx = canvas.getContext('2d');
-	            ctx.fillStyle = colorBlack.getNext()
-	            ctx.fillRect(0, 0, canvas.width, canvas.height);
-	        }, 100)
-	    }
-	})
+	
+	/**
+	 * This is the common logic for both the Node.js and web browser
+	 * implementations of `debug()`.
+	 *
+	 * Expose `debug()` as the module.
+	 */
 
-	module.exports.name = 'debugCanvas'
-	    
+	exports = module.exports = debug;
+	exports.coerce = coerce;
+	exports.disable = disable;
+	exports.enable = enable;
+	exports.enabled = enabled;
+	exports.humanize = __webpack_require__(23);
+
+	/**
+	 * The currently active debug mode names, and names to skip.
+	 */
+
+	exports.names = [];
+	exports.skips = [];
+
+	/**
+	 * Map of special "%n" handling functions, for the debug "format" argument.
+	 *
+	 * Valid key names are a single, lowercased letter, i.e. "n".
+	 */
+
+	exports.formatters = {};
+
+	/**
+	 * Previously assigned color.
+	 */
+
+	var prevColor = 0;
+
+	/**
+	 * Previous log timestamp.
+	 */
+
+	var prevTime;
+
+	/**
+	 * Select a color.
+	 *
+	 * @return {Number}
+	 * @api private
+	 */
+
+	function selectColor() {
+	  return exports.colors[prevColor++ % exports.colors.length];
+	}
+
+	/**
+	 * Create a debugger with the given `namespace`.
+	 *
+	 * @param {String} namespace
+	 * @return {Function}
+	 * @api public
+	 */
+
+	function debug(namespace) {
+
+	  // define the `disabled` version
+	  function disabled() {
+	  }
+	  disabled.enabled = false;
+
+	  // define the `enabled` version
+	  function enabled() {
+
+	    var self = enabled;
+
+	    // set `diff` timestamp
+	    var curr = +new Date();
+	    var ms = curr - (prevTime || curr);
+	    self.diff = ms;
+	    self.prev = prevTime;
+	    self.curr = curr;
+	    prevTime = curr;
+
+	    // add the `color` if not set
+	    if (null == self.useColors) self.useColors = exports.useColors();
+	    if (null == self.color && self.useColors) self.color = selectColor();
+
+	    var args = Array.prototype.slice.call(arguments);
+
+	    args[0] = exports.coerce(args[0]);
+
+	    if ('string' !== typeof args[0]) {
+	      // anything else let's inspect with %o
+	      args = ['%o'].concat(args);
+	    }
+
+	    // apply any `formatters` transformations
+	    var index = 0;
+	    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
+	      // if we encounter an escaped % then don't increase the array index
+	      if (match === '%%') return match;
+	      index++;
+	      var formatter = exports.formatters[format];
+	      if ('function' === typeof formatter) {
+	        var val = args[index];
+	        match = formatter.call(self, val);
+
+	        // now we need to remove `args[index]` since it's inlined in the `format`
+	        args.splice(index, 1);
+	        index--;
+	      }
+	      return match;
+	    });
+
+	    if ('function' === typeof exports.formatArgs) {
+	      args = exports.formatArgs.apply(self, args);
+	    }
+	    var logFn = enabled.log || exports.log || console.log.bind(console);
+	    logFn.apply(self, args);
+	  }
+	  enabled.enabled = true;
+
+	  var fn = exports.enabled(namespace) ? enabled : disabled;
+
+	  fn.namespace = namespace;
+
+	  return fn;
+	}
+
+	/**
+	 * Enables a debug mode by namespaces. This can include modes
+	 * separated by a colon and wildcards.
+	 *
+	 * @param {String} namespaces
+	 * @api public
+	 */
+
+	function enable(namespaces) {
+	  exports.save(namespaces);
+
+	  var split = (namespaces || '').split(/[\s,]+/);
+	  var len = split.length;
+
+	  for (var i = 0; i < len; i++) {
+	    if (!split[i]) continue; // ignore empty strings
+	    namespaces = split[i].replace(/\*/g, '.*?');
+	    if (namespaces[0] === '-') {
+	      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+	    } else {
+	      exports.names.push(new RegExp('^' + namespaces + '$'));
+	    }
+	  }
+	}
+
+	/**
+	 * Disable debug output.
+	 *
+	 * @api public
+	 */
+
+	function disable() {
+	  exports.enable('');
+	}
+
+	/**
+	 * Returns true if the given mode name is enabled, false otherwise.
+	 *
+	 * @param {String} name
+	 * @return {Boolean}
+	 * @api public
+	 */
+
+	function enabled(name) {
+	  var i, len;
+	  for (i = 0, len = exports.skips.length; i < len; i++) {
+	    if (exports.skips[i].test(name)) {
+	      return false;
+	    }
+	  }
+	  for (i = 0, len = exports.names.length; i < len; i++) {
+	    if (exports.names[i].test(name)) {
+	      return true;
+	    }
+	  }
+	  return false;
+	}
+
+	/**
+	 * Coerce `val`.
+	 *
+	 * @param {Mixed} val
+	 * @return {Mixed}
+	 * @api private
+	 */
+
+	function coerce(val) {
+	  if (val instanceof Error) return val.stack || val.message;
+	  return val;
+	}
+
 
 /***/ },
 /* 23 */
+/***/ function(module, exports) {
+
+	/**
+	 * Helpers.
+	 */
+
+	var s = 1000;
+	var m = s * 60;
+	var h = m * 60;
+	var d = h * 24;
+	var y = d * 365.25;
+
+	/**
+	 * Parse or format the given `val`.
+	 *
+	 * Options:
+	 *
+	 *  - `long` verbose formatting [false]
+	 *
+	 * @param {String|Number} val
+	 * @param {Object} options
+	 * @return {String|Number}
+	 * @api public
+	 */
+
+	module.exports = function(val, options){
+	  options = options || {};
+	  if ('string' == typeof val) return parse(val);
+	  return options.long
+	    ? long(val)
+	    : short(val);
+	};
+
+	/**
+	 * Parse the given `str` and return milliseconds.
+	 *
+	 * @param {String} str
+	 * @return {Number}
+	 * @api private
+	 */
+
+	function parse(str) {
+	  str = '' + str;
+	  if (str.length > 10000) return;
+	  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
+	  if (!match) return;
+	  var n = parseFloat(match[1]);
+	  var type = (match[2] || 'ms').toLowerCase();
+	  switch (type) {
+	    case 'years':
+	    case 'year':
+	    case 'yrs':
+	    case 'yr':
+	    case 'y':
+	      return n * y;
+	    case 'days':
+	    case 'day':
+	    case 'd':
+	      return n * d;
+	    case 'hours':
+	    case 'hour':
+	    case 'hrs':
+	    case 'hr':
+	    case 'h':
+	      return n * h;
+	    case 'minutes':
+	    case 'minute':
+	    case 'mins':
+	    case 'min':
+	    case 'm':
+	      return n * m;
+	    case 'seconds':
+	    case 'second':
+	    case 'secs':
+	    case 'sec':
+	    case 's':
+	      return n * s;
+	    case 'milliseconds':
+	    case 'millisecond':
+	    case 'msecs':
+	    case 'msec':
+	    case 'ms':
+	      return n;
+	  }
+	}
+
+	/**
+	 * Short format for `ms`.
+	 *
+	 * @param {Number} ms
+	 * @return {String}
+	 * @api private
+	 */
+
+	function short(ms) {
+	  if (ms >= d) return Math.round(ms / d) + 'd';
+	  if (ms >= h) return Math.round(ms / h) + 'h';
+	  if (ms >= m) return Math.round(ms / m) + 'm';
+	  if (ms >= s) return Math.round(ms / s) + 's';
+	  return ms + 'ms';
+	}
+
+	/**
+	 * Long format for `ms`.
+	 *
+	 * @param {Number} ms
+	 * @return {String}
+	 * @api private
+	 */
+
+	function long(ms) {
+	  return plural(ms, d, 'day')
+	    || plural(ms, h, 'hour')
+	    || plural(ms, m, 'minute')
+	    || plural(ms, s, 'second')
+	    || ms + ' ms';
+	}
+
+	/**
+	 * Pluralization helper.
+	 */
+
+	function plural(ms, n, name) {
+	  if (ms < n) return;
+	  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
+	  return Math.ceil(ms / n) + ' ' + name + 's';
+	}
+
+
+/***/ },
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -54621,11 +55002,11 @@
 	 */
 
 	var debug = __webpack_require__(21)('socket.io-parser');
-	var json = __webpack_require__(24);
-	var isArray = __webpack_require__(26);
-	var Emitter = __webpack_require__(27);
-	var binary = __webpack_require__(28);
-	var isBuf = __webpack_require__(29);
+	var json = __webpack_require__(25);
+	var isArray = __webpack_require__(27);
+	var Emitter = __webpack_require__(28);
+	var binary = __webpack_require__(29);
+	var isBuf = __webpack_require__(30);
 
 	/**
 	 * Protocol version.
@@ -55018,14 +55399,14 @@
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 	;(function () {
 	  // Detect the `define` function exposed by asynchronous module loaders. The
 	  // strict `define` check is necessary for compatibility with `r.js`.
-	  var isLoader = "function" === "function" && __webpack_require__(25);
+	  var isLoader = "function" === "function" && __webpack_require__(26);
 
 	  // A set of types used to distinguish objects from primitives.
 	  var objectTypes = {
@@ -55927,7 +56308,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)(module), (function() { return this; }())))
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;
@@ -55935,7 +56316,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports) {
 
 	module.exports = Array.isArray || function (arr) {
@@ -55944,7 +56325,7 @@
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports) {
 
 	
@@ -56114,7 +56495,7 @@
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/*global Blob,File*/
@@ -56123,8 +56504,8 @@
 	 * Module requirements
 	 */
 
-	var isArray = __webpack_require__(26);
-	var isBuf = __webpack_require__(29);
+	var isArray = __webpack_require__(27);
+	var isBuf = __webpack_require__(30);
 
 	/**
 	 * Replaces every Buffer | ArrayBuffer in packet with a numbered placeholder.
@@ -56262,7 +56643,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -56282,7 +56663,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -56290,15 +56671,15 @@
 	 * Module dependencies.
 	 */
 
-	var eio = __webpack_require__(31);
-	var Socket = __webpack_require__(56);
-	var Emitter = __webpack_require__(57);
-	var parser = __webpack_require__(23);
-	var on = __webpack_require__(59);
-	var bind = __webpack_require__(60);
+	var eio = __webpack_require__(32);
+	var Socket = __webpack_require__(59);
+	var Emitter = __webpack_require__(60);
+	var parser = __webpack_require__(24);
+	var on = __webpack_require__(62);
+	var bind = __webpack_require__(63);
 	var debug = __webpack_require__(21)('socket.io-client:manager');
-	var indexOf = __webpack_require__(54);
-	var Backoff = __webpack_require__(62);
+	var indexOf = __webpack_require__(57);
+	var Backoff = __webpack_require__(66);
 
 	/**
 	 * IE6+ hasOwnProperty
@@ -56845,19 +57226,19 @@
 
 
 /***/ },
-/* 31 */
-/***/ function(module, exports, __webpack_require__) {
-
-	
-	module.exports =  __webpack_require__(32);
-
-
-/***/ },
 /* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
-	module.exports = __webpack_require__(33);
+	module.exports =  __webpack_require__(33);
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	module.exports = __webpack_require__(34);
 
 	/**
 	 * Exports parser
@@ -56865,25 +57246,25 @@
 	 * @api public
 	 *
 	 */
-	module.exports.parser = __webpack_require__(40);
+	module.exports.parser = __webpack_require__(41);
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var transports = __webpack_require__(34);
-	var Emitter = __webpack_require__(27);
+	var transports = __webpack_require__(35);
+	var Emitter = __webpack_require__(50);
 	var debug = __webpack_require__(21)('engine.io-client:socket');
-	var index = __webpack_require__(54);
-	var parser = __webpack_require__(40);
+	var index = __webpack_require__(57);
+	var parser = __webpack_require__(41);
 	var parseuri = __webpack_require__(20);
-	var parsejson = __webpack_require__(55);
-	var parseqs = __webpack_require__(48);
+	var parsejson = __webpack_require__(58);
+	var parseqs = __webpack_require__(51);
 
 	/**
 	 * Module exports.
@@ -57007,9 +57388,9 @@
 	 */
 
 	Socket.Socket = Socket;
-	Socket.Transport = __webpack_require__(39);
-	Socket.transports = __webpack_require__(34);
-	Socket.parser = __webpack_require__(40);
+	Socket.Transport = __webpack_require__(40);
+	Socket.transports = __webpack_require__(35);
+	Socket.parser = __webpack_require__(41);
 
 	/**
 	 * Creates transport of the given type.
@@ -57604,17 +57985,17 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies
 	 */
 
-	var XMLHttpRequest = __webpack_require__(35);
-	var XHR = __webpack_require__(37);
-	var JSONP = __webpack_require__(51);
-	var websocket = __webpack_require__(52);
+	var XMLHttpRequest = __webpack_require__(36);
+	var XHR = __webpack_require__(38);
+	var JSONP = __webpack_require__(54);
+	var websocket = __webpack_require__(55);
 
 	/**
 	 * Export transports.
@@ -57664,11 +58045,11 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// browser shim for xmlhttprequest module
-	var hasCORS = __webpack_require__(36);
+	var hasCORS = __webpack_require__(37);
 
 	module.exports = function(opts) {
 	  var xdomain = opts.xdomain;
@@ -57706,7 +58087,7 @@
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports) {
 
 	
@@ -57729,17 +58110,17 @@
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module requirements.
 	 */
 
-	var XMLHttpRequest = __webpack_require__(35);
-	var Polling = __webpack_require__(38);
-	var Emitter = __webpack_require__(27);
-	var inherit = __webpack_require__(49);
+	var XMLHttpRequest = __webpack_require__(36);
+	var Polling = __webpack_require__(39);
+	var Emitter = __webpack_require__(50);
+	var inherit = __webpack_require__(52);
 	var debug = __webpack_require__(21)('engine.io-client:polling-xhr');
 
 	/**
@@ -58148,18 +58529,18 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(39);
-	var parseqs = __webpack_require__(48);
-	var parser = __webpack_require__(40);
-	var inherit = __webpack_require__(49);
-	var yeast = __webpack_require__(50);
+	var Transport = __webpack_require__(40);
+	var parseqs = __webpack_require__(51);
+	var parser = __webpack_require__(41);
+	var inherit = __webpack_require__(52);
+	var yeast = __webpack_require__(53);
 	var debug = __webpack_require__(21)('engine.io-client:polling');
 
 	/**
@@ -58173,7 +58554,7 @@
 	 */
 
 	var hasXHR2 = (function() {
-	  var XMLHttpRequest = __webpack_require__(35);
+	  var XMLHttpRequest = __webpack_require__(36);
 	  var xhr = new XMLHttpRequest({ xdomain: false });
 	  return null != xhr.responseType;
 	})();
@@ -58401,15 +58782,15 @@
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(40);
-	var Emitter = __webpack_require__(27);
+	var parser = __webpack_require__(41);
+	var Emitter = __webpack_require__(50);
 
 	/**
 	 * Module exports.
@@ -58562,19 +58943,19 @@
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var keys = __webpack_require__(41);
-	var hasBinary = __webpack_require__(42);
-	var sliceBuffer = __webpack_require__(43);
-	var base64encoder = __webpack_require__(44);
-	var after = __webpack_require__(45);
-	var utf8 = __webpack_require__(46);
+	var keys = __webpack_require__(42);
+	var hasBinary = __webpack_require__(43);
+	var sliceBuffer = __webpack_require__(45);
+	var base64encoder = __webpack_require__(46);
+	var after = __webpack_require__(47);
+	var utf8 = __webpack_require__(48);
 
 	/**
 	 * Check if we are running an android browser. That requires us to use
@@ -58631,7 +59012,7 @@
 	 * Create a blob api even for blob builder when vendor prefixes exist
 	 */
 
-	var Blob = __webpack_require__(47);
+	var Blob = __webpack_require__(49);
 
 	/**
 	 * Encodes a packet.
@@ -59163,7 +59544,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports) {
 
 	
@@ -59188,7 +59569,7 @@
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -59196,7 +59577,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(26);
+	var isArray = __webpack_require__(44);
 
 	/**
 	 * Module exports.
@@ -59253,7 +59634,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 43 */
+/* 44 */
+/***/ function(module, exports) {
+
+	module.exports = Array.isArray || function (arr) {
+	  return Object.prototype.toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 45 */
 /***/ function(module, exports) {
 
 	/**
@@ -59288,7 +59678,7 @@
 
 
 /***/ },
-/* 44 */
+/* 46 */
 /***/ function(module, exports) {
 
 	/*
@@ -59353,7 +59743,7 @@
 
 
 /***/ },
-/* 45 */
+/* 47 */
 /***/ function(module, exports) {
 
 	module.exports = after
@@ -59387,7 +59777,7 @@
 
 
 /***/ },
-/* 46 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module, global) {/*! https://mths.be/utf8js v2.0.0 by @mathias */
@@ -59636,7 +60026,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(13)(module), (function() { return this; }())))
 
 /***/ },
-/* 47 */
+/* 49 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -59739,7 +60129,177 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 48 */
+/* 50 */
+/***/ function(module, exports) {
+
+	
+	/**
+	 * Expose `Emitter`.
+	 */
+
+	module.exports = Emitter;
+
+	/**
+	 * Initialize a new `Emitter`.
+	 *
+	 * @api public
+	 */
+
+	function Emitter(obj) {
+	  if (obj) return mixin(obj);
+	};
+
+	/**
+	 * Mixin the emitter properties.
+	 *
+	 * @param {Object} obj
+	 * @return {Object}
+	 * @api private
+	 */
+
+	function mixin(obj) {
+	  for (var key in Emitter.prototype) {
+	    obj[key] = Emitter.prototype[key];
+	  }
+	  return obj;
+	}
+
+	/**
+	 * Listen on the given `event` with `fn`.
+	 *
+	 * @param {String} event
+	 * @param {Function} fn
+	 * @return {Emitter}
+	 * @api public
+	 */
+
+	Emitter.prototype.on =
+	Emitter.prototype.addEventListener = function(event, fn){
+	  this._callbacks = this._callbacks || {};
+	  (this._callbacks[event] = this._callbacks[event] || [])
+	    .push(fn);
+	  return this;
+	};
+
+	/**
+	 * Adds an `event` listener that will be invoked a single
+	 * time then automatically removed.
+	 *
+	 * @param {String} event
+	 * @param {Function} fn
+	 * @return {Emitter}
+	 * @api public
+	 */
+
+	Emitter.prototype.once = function(event, fn){
+	  var self = this;
+	  this._callbacks = this._callbacks || {};
+
+	  function on() {
+	    self.off(event, on);
+	    fn.apply(this, arguments);
+	  }
+
+	  on.fn = fn;
+	  this.on(event, on);
+	  return this;
+	};
+
+	/**
+	 * Remove the given callback for `event` or all
+	 * registered callbacks.
+	 *
+	 * @param {String} event
+	 * @param {Function} fn
+	 * @return {Emitter}
+	 * @api public
+	 */
+
+	Emitter.prototype.off =
+	Emitter.prototype.removeListener =
+	Emitter.prototype.removeAllListeners =
+	Emitter.prototype.removeEventListener = function(event, fn){
+	  this._callbacks = this._callbacks || {};
+
+	  // all
+	  if (0 == arguments.length) {
+	    this._callbacks = {};
+	    return this;
+	  }
+
+	  // specific event
+	  var callbacks = this._callbacks[event];
+	  if (!callbacks) return this;
+
+	  // remove all handlers
+	  if (1 == arguments.length) {
+	    delete this._callbacks[event];
+	    return this;
+	  }
+
+	  // remove specific handler
+	  var cb;
+	  for (var i = 0; i < callbacks.length; i++) {
+	    cb = callbacks[i];
+	    if (cb === fn || cb.fn === fn) {
+	      callbacks.splice(i, 1);
+	      break;
+	    }
+	  }
+	  return this;
+	};
+
+	/**
+	 * Emit `event` with the given args.
+	 *
+	 * @param {String} event
+	 * @param {Mixed} ...
+	 * @return {Emitter}
+	 */
+
+	Emitter.prototype.emit = function(event){
+	  this._callbacks = this._callbacks || {};
+	  var args = [].slice.call(arguments, 1)
+	    , callbacks = this._callbacks[event];
+
+	  if (callbacks) {
+	    callbacks = callbacks.slice(0);
+	    for (var i = 0, len = callbacks.length; i < len; ++i) {
+	      callbacks[i].apply(this, args);
+	    }
+	  }
+
+	  return this;
+	};
+
+	/**
+	 * Return array of callbacks for `event`.
+	 *
+	 * @param {String} event
+	 * @return {Array}
+	 * @api public
+	 */
+
+	Emitter.prototype.listeners = function(event){
+	  this._callbacks = this._callbacks || {};
+	  return this._callbacks[event] || [];
+	};
+
+	/**
+	 * Check if this emitter has `event` handlers.
+	 *
+	 * @param {String} event
+	 * @return {Boolean}
+	 * @api public
+	 */
+
+	Emitter.prototype.hasListeners = function(event){
+	  return !! this.listeners(event).length;
+	};
+
+
+/***/ },
+/* 51 */
 /***/ function(module, exports) {
 
 	/**
@@ -59782,7 +60342,7 @@
 
 
 /***/ },
-/* 49 */
+/* 52 */
 /***/ function(module, exports) {
 
 	
@@ -59794,7 +60354,7 @@
 	};
 
 /***/ },
-/* 50 */
+/* 53 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -59868,7 +60428,7 @@
 
 
 /***/ },
-/* 51 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -59876,8 +60436,8 @@
 	 * Module requirements.
 	 */
 
-	var Polling = __webpack_require__(38);
-	var inherit = __webpack_require__(49);
+	var Polling = __webpack_require__(39);
+	var inherit = __webpack_require__(52);
 
 	/**
 	 * Module exports.
@@ -60113,18 +60673,18 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 52 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
 	 * Module dependencies.
 	 */
 
-	var Transport = __webpack_require__(39);
-	var parser = __webpack_require__(40);
-	var parseqs = __webpack_require__(48);
-	var inherit = __webpack_require__(49);
-	var yeast = __webpack_require__(50);
+	var Transport = __webpack_require__(40);
+	var parser = __webpack_require__(41);
+	var parseqs = __webpack_require__(51);
+	var inherit = __webpack_require__(52);
+	var yeast = __webpack_require__(53);
 	var debug = __webpack_require__(21)('engine.io-client:websocket');
 	var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
@@ -60137,7 +60697,7 @@
 	var WebSocket = BrowserWebSocket;
 	if (!WebSocket && typeof window === 'undefined') {
 	  try {
-	    WebSocket = __webpack_require__(53);
+	    WebSocket = __webpack_require__(56);
 	  } catch (e) { }
 	}
 
@@ -60408,13 +60968,13 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 53 */
+/* 56 */
 /***/ function(module, exports) {
 
 	/* (ignored) */
 
 /***/ },
-/* 54 */
+/* 57 */
 /***/ function(module, exports) {
 
 	
@@ -60429,7 +60989,7 @@
 	};
 
 /***/ },
-/* 55 */
+/* 58 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -60467,7 +61027,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 56 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	
@@ -60475,13 +61035,13 @@
 	 * Module dependencies.
 	 */
 
-	var parser = __webpack_require__(23);
-	var Emitter = __webpack_require__(57);
-	var toArray = __webpack_require__(58);
-	var on = __webpack_require__(59);
-	var bind = __webpack_require__(60);
+	var parser = __webpack_require__(24);
+	var Emitter = __webpack_require__(60);
+	var toArray = __webpack_require__(61);
+	var on = __webpack_require__(62);
+	var bind = __webpack_require__(63);
 	var debug = __webpack_require__(21)('socket.io-client:socket');
-	var hasBin = __webpack_require__(61);
+	var hasBin = __webpack_require__(64);
 
 	/**
 	 * Module exports.
@@ -60885,7 +61445,7 @@
 
 
 /***/ },
-/* 57 */
+/* 60 */
 /***/ function(module, exports) {
 
 	
@@ -61052,7 +61612,7 @@
 
 
 /***/ },
-/* 58 */
+/* 61 */
 /***/ function(module, exports) {
 
 	module.exports = toArray
@@ -61071,7 +61631,7 @@
 
 
 /***/ },
-/* 59 */
+/* 62 */
 /***/ function(module, exports) {
 
 	
@@ -61101,7 +61661,7 @@
 
 
 /***/ },
-/* 60 */
+/* 63 */
 /***/ function(module, exports) {
 
 	/**
@@ -61130,7 +61690,7 @@
 
 
 /***/ },
-/* 61 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {
@@ -61138,7 +61698,7 @@
 	 * Module requirements.
 	 */
 
-	var isArray = __webpack_require__(26);
+	var isArray = __webpack_require__(65);
 
 	/**
 	 * Module exports.
@@ -61196,7 +61756,16 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 62 */
+/* 65 */
+/***/ function(module, exports) {
+
+	module.exports = Array.isArray || function (arr) {
+	  return Object.prototype.toString.call(arr) == '[object Array]';
+	};
+
+
+/***/ },
+/* 66 */
 /***/ function(module, exports) {
 
 	
@@ -61287,7 +61856,7 @@
 
 
 /***/ },
-/* 63 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/*
@@ -61309,51 +61878,62 @@
 	__webpack_require__(3)
 	angular.module('phoneDetail', [
 	  'ngRoute',
-	  __webpack_require__(64).name,
-	  __webpack_require__(21).name
+	  __webpack_require__(68).name,
+	  __webpack_require__(71).name,
+	  __webpack_require__(73).name
 	])
-	.component('phoneDetail', __webpack_require__(65));
+	.component('phoneDetail', __webpack_require__(75));
 	//.controller('phoneDetailController', require('./controller.js'))
 	//.directive('phoneDetail', require('./directive.js'))
 
 /***/ },
-/* 64 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	__webpack_require__(3)
+	__webpack_require__(69)
 	angular.module('deviceScreen', [
 	  'ngRoute'
+	  ,'stf/scaling'
 	])
 	.component('deviceScreen', {
 	    template: '<div style="text-align:center"><canvas></canvas></div>',
 	    bindings : {
-	      display : '<'
+	      device : '<'
+	      ,control : '<'
 	    },
-	    controller : ['$scope', '$element', '$attrs', '$routeParams',  
-	      function($scope, $element, $attrs, $routeParams){
-	          console.log(this.display)
+	    controller : ['$scope', '$element', '$attrs', '$routeParams', '$document','ScalingService',
+	      function($scope, $element, $attrs, $routeParams, $document, ScalingService){
+
+	        var device = this.device;
+	        var control = this.control;
+
+	        var scaler = ScalingService.coordinator(
+	          device.display.width
+	          , device.display.height
+	          )  
+
 	          var min_scale = 0.36;
 	          var canvas = $element.find('canvas')[0];
 	          //按照当前浏览器的高度，初始化最佳canvas大小
-	          var raw_ratio = this.display.width/this.display.height;
+	          var raw_ratio = device.display.width/device.display.height;
 	          canvas.height = document.documentElement.clientHeight;
 	          canvas.width = canvas.height * raw_ratio;
 	        
-	          //var BLANK_IMG =
-	          //'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
-	          var ws = new WebSocket(this.display.url);
+	          var BLANK_IMG =
+	          'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=='
+	          var ws = new WebSocket(device.display.url);
 	          ws.binaryType = 'blob'
 	          ws.onmessage = function(message) {
 	            try{
-	              console.log(message);
-
+	              console.log(message.data.size);
 	              var canvas = $element.find('canvas')[0];
 	              var ctx = canvas.getContext('2d');
 	              var blob = new Blob([message.data], {type: 'image/jpge'})
 	              var URL = window.URL || window.webkitURL
 	              var img = new Image()
 	              img.onload = function() {
-	                console.log(img.width, img.height)
+	                //console.log(img.width, img.height)
 	                canvas.width = img.width
 	                canvas.height = img.height
 	                ctx.drawImage(img, 0, 0)
@@ -61371,7 +61951,218 @@
 	            }
 
 	          };
-	        
+
+	      (function(){
+	        var seq = -1
+	        var cycle = 100
+
+	        function nextSeq() {
+	          return ++seq >= cycle ? (seq = 0) : seq
+	        }
+
+	        function calculateBounds(el) {
+	          //var el = element[0]
+	          var screen = {
+	            rotation: 0
+	          , bounds: {
+	              x: 0
+	            , y: 0
+	            , w: 0
+	            , h: 0
+	            }
+	          }
+	          screen.bounds.w = el.offsetWidth
+	          screen.bounds.h = el.offsetHeight
+	          screen.bounds.x = 0
+	          screen.bounds.y = 0
+
+	          while (el.offsetParent) {
+	            screen.bounds.x += el.offsetLeft
+	            screen.bounds.y += el.offsetTop
+	            el = el.offsetParent
+	          }
+
+	          return screen;
+	        }
+
+	        function mouseDownListener(event) {
+	          /*
+	            clientX,clientY(478,386)
+	            layerX,layerY(478,333)
+	            offsetX,offsetY(478,280)
+	            pageX,pageY(478,386)
+	            screenX,screenY(478,312)
+	            x,y(478,386)
+
+	            原实现中有加入altKey支持，按住alt键再点击，会生成两个touch按钮
+
+	          */
+	            var e = event
+	            if (e.originalEvent) {
+	              e = e.originalEvent
+	            }
+
+	            // Skip secondary click
+	            if (e.which === 3) {
+	              return
+	            }
+
+	            e.preventDefault()
+
+	            //fakePinch = e.altKey
+
+	            /*
+	            计算出canvas所在区域的参数信息
+	              高度，宽度（offsetHeight，offsetWidth）
+	              在浏览器中的相对原点（offsetTop，offsetLeft）
+
+	              从最内部的canvas元素开始计算screen区域
+	            */
+	            var screen = calculateBounds($element.find('canvas')[0])
+	            //startMousing()
+
+	            var x = e.pageX - screen.bounds.x
+	            var y = e.pageY - screen.bounds.y
+
+	            var pressure = 0.5
+	            var scaled = scaler.coords(
+	                  screen.bounds.w
+	                , screen.bounds.h
+	                , x
+	                , y
+	                , screen.rotation
+	                )
+
+	            //计算之后可得到scaled对象，其中包含了点击点的x，y轴百分比信息
+	            //百分比信息与原始的设备屏幕高宽的乘积，既可还原浏览器中点击点与设备屏幕点击点之间的映射
+	            
+	            control.touchDown(nextSeq(), 0, scaled.xP, scaled.yP, pressure)
+	            /*
+	            if (fakePinch) {
+	              control.touchDown(nextSeq(), 1, 1 - scaled.xP, 1 - scaled.yP,
+	                pressure)
+	            }
+	            */
+
+	            control.touchCommit(nextSeq())
+	            /*
+	            activateFinger(0, x, y, pressure)
+
+	            if (fakePinch) {
+	              activateFinger(1, -e.pageX + screen.bounds.x + screen.bounds.w,
+	                -e.pageY + screen.bounds.y + screen.bounds.h, pressure)
+	            }
+	            */
+	            
+	            $element.bind('mousemove', mouseMoveListener)
+	            $document.bind('mouseup', mouseUpListener)
+	            $document.bind('mouseleave', mouseUpListener)
+	            /*
+	            if (lastPossiblyBuggyMouseUpEvent &&
+	                lastPossiblyBuggyMouseUpEvent.timeStamp > e.timeStamp) {
+	              // We got mouseup before mousedown. See mouseUpBugWorkaroundListener
+	              // for details.
+	              mouseUpListener(lastPossiblyBuggyMouseUpEvent)
+	            }
+	            else {
+	              lastPossiblyBuggyMouseUpEvent = null
+	            }
+	            */
+	            
+	          }
+
+	          function mouseUpListener(event) {
+	            var e = event
+	            if (e.originalEvent) {
+	              e = e.originalEvent
+	            }
+
+	            // Skip secondary click
+	            if (e.which === 3) {
+	              return
+	            }
+	            e.preventDefault()
+	            
+	            control.touchUp(nextSeq(), 0)
+	            /*
+	            if (fakePinch) {
+	              control.touchUp(nextSeq(), 1)
+	            }*/
+
+	            control.touchCommit(nextSeq())
+
+	            //deactivateFinger(0)
+	            /*
+	            if (fakePinch) {
+	              deactivateFinger(1)
+	            }
+	            */
+
+	            //stopMousing()
+	            $element.unbind('mousemove', mouseMoveListener)
+	            $document.unbind('mouseup', mouseUpListener)
+	            $document.unbind('mouseleave', mouseUpListener)
+	        }
+	        function mouseMoveListener(event) {
+	          var e = event
+	          if (e.originalEvent) {
+	            e = e.originalEvent
+	          }
+
+	          // Skip secondary click
+	          if (e.which === 3) {
+	            return
+	          }
+	          e.preventDefault()
+	/*
+	          var addGhostFinger = !fakePinch && e.altKey
+	          var deleteGhostFinger = fakePinch && !e.altKey
+
+	          fakePinch = e.altKey
+	*/
+	          var screen = calculateBounds($element.find('canvas')[0])
+	          var x = e.pageX - screen.bounds.x
+	          var y = e.pageY - screen.bounds.y
+	          var pressure = 0.5
+	          var scaled = scaler.coords(
+	                screen.bounds.w
+	              , screen.bounds.h
+	              , x
+	              , y
+	              , screen.rotation
+	              )
+
+	          control.touchMove(nextSeq(), 0, scaled.xP, scaled.yP, pressure)
+	/*
+	          if (addGhostFinger) {
+	            control.touchDown(nextSeq(), 1, 1 - scaled.xP, 1 - scaled.yP, pressure)
+	          }
+	          else if (deleteGhostFinger) {
+	            control.touchUp(nextSeq(), 1)
+	          }
+	          else if (fakePinch) {
+	            control.touchMove(nextSeq(), 1, 1 - scaled.xP, 1 - scaled.yP, pressure)
+	          }
+	*/
+	          control.touchCommit(nextSeq())
+	/*
+	          activateFinger(0, x, y, pressure)
+
+	          if (deleteGhostFinger) {
+	            deactivateFinger(1)
+	          }
+	          else if (fakePinch) {
+	            activateFinger(1, -e.pageX + screen.bounds.x + screen.bounds.w,
+	              -e.pageY + screen.bounds.y + screen.bounds.h, pressure)
+	          }
+	          */
+	        }
+
+	          $element.on('mousedown', mouseDownListener)
+	      })()
+
+	      
+
 
 	    }]
 	})
@@ -61379,15 +62170,626 @@
 	    
 
 /***/ },
-/* 65 */
+/* 69 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = angular.module('stf/scaling', [])
+	  .factory('ScalingService', __webpack_require__(70))
+
+
+/***/ },
+/* 70 */
+/***/ function(module, exports) {
+
+	module.exports = function ScalingServiceFactory() {
+	  var scalingService = {
+	  }
+
+	  scalingService.coordinator = function(realWidth, realHeight) {
+	    var realRatio = realWidth / realHeight
+
+	    /**
+	     * Rotation affects the screen as follows:
+	     *
+	     *                   0deg
+	     *                 |------|
+	     *                 | MENU |
+	     *                 |------|
+	     *            -->  |      |  --|
+	     *            |    |      |    v
+	     *                 |      |
+	     *                 |      |
+	     *                 |------|
+	     *        |----|-|          |-|----|
+	     *        |    |M|          | |    |
+	     *        |    |E|          | |    |
+	     *  90deg |    |N|          |U|    | 270deg
+	     *        |    |U|          |N|    |
+	     *        |    | |          |E|    |
+	     *        |    | |          |M|    |
+	     *        |----|-|          |-|----|
+	     *                 |------|
+	     *            ^    |      |    |
+	     *            |--  |      |  <--
+	     *                 |      |
+	     *                 |      |
+	     *                 |------|
+	     *                 | UNEM |
+	     *                 |------|
+	     *                  180deg
+	     *
+	     * Which leads to the following mapping:
+	     *
+	     * |--------------|------|---------|---------|---------|
+	     * |              | 0deg |  90deg  |  180deg |  270deg |
+	     * |--------------|------|---------|---------|---------|
+	     * | CSS rotate() | 0deg | -90deg  | -180deg |  90deg  |
+	     * | bounding w   |  w   |    h    |    w    |    h    |
+	     * | bounding h   |  h   |    w    |    h    |    w    |
+	     * | pos x        |  x   |   h-y   |   w-x   |    y    |
+	     * | pos y        |  y   |    x    |   h-y   |   h-x   |
+	     * |--------------|------|---------|---------|---------|
+	     */
+	    return {
+	      coords: function(boundingW, boundingH, relX, relY, rotation) {
+	        var w, h, x, y, ratio, scaledValue
+
+	        switch (rotation) {
+	        case 0:
+	          w = boundingW
+	          h = boundingH
+	          x = relX
+	          y = relY
+	          break
+	        case 90:
+	          w = boundingH
+	          h = boundingW
+	          x = boundingH - relY
+	          y = relX
+	          break
+	        case 180:
+	          w = boundingW
+	          h = boundingH
+	          x = boundingW - relX
+	          y = boundingH - relY
+	          break
+	        case 270:
+	          w = boundingH
+	          h = boundingW
+	          x = relY
+	          y = boundingW - relX
+	          break
+	        }
+
+	        ratio = w / h
+
+	        if (realRatio > ratio) {
+	          // covers the area horizontally
+	          scaledValue = w / realRatio
+
+	          // adjust y to start from the scaled top edge
+	          y -= (h - scaledValue) / 2
+
+	          // not touching the screen, but we want to trigger certain events
+	          // (like touchup) anyway, so let's do it on the edges.
+	          if (y < 0) {
+	            y = 0
+	          }
+	          else if (y > scaledValue) {
+	            y = scaledValue
+	          }
+
+	          // make sure x is within bounds too
+	          if (x < 0) {
+	            x = 0
+	          }
+	          else if (x > w) {
+	            x = w
+	          }
+
+	          h = scaledValue
+	        }
+	        else {
+	          // covers the area vertically
+	          scaledValue = h * realRatio
+
+	          // adjust x to start from the scaled left edge
+	          x -= (w - scaledValue) / 2
+
+	          // not touching the screen, but we want to trigger certain events
+	          // (like touchup) anyway, so let's do it on the edges.
+	          if (x < 0) {
+	            x = 0
+	          }
+	          else if (x > scaledValue) {
+	            x = scaledValue
+	          }
+
+	          // make sure y is within bounds too
+	          if (y < 0) {
+	            y = 0
+	          }
+	          else if (y > h) {
+	            y = h
+	          }
+
+	          w = scaledValue
+	        }
+
+	        return {
+	          xP: x / w
+	        , yP: y / h
+	        }
+	      }
+	    , size: function(sizeWidth, sizeHeight) {
+	        var width = sizeWidth
+	        var height = sizeHeight
+	        var ratio = width / height
+
+	        if (realRatio > ratio) {
+	          // covers the area horizontally
+
+	          if (width >= realWidth) {
+	            // don't go over max size
+	            width = realWidth
+	            height = realHeight
+	          }
+	          else {
+	            height = Math.floor(width / realRatio)
+	          }
+	        }
+	        else {
+	          // covers the area vertically
+
+	          if (height >= realHeight) {
+	            // don't go over max size
+	            height = realHeight
+	            width = realWidth
+	          }
+	          else {
+	            width = Math.floor(height * realRatio)
+	          }
+	        }
+
+	        return {
+	          width: width
+	        , height: height
+	        }
+	      }
+	    , projectedSize: function(boundingW, boundingH, rotation) {
+	        var w, h
+
+	        switch (rotation) {
+	        case 0:
+	        case 180:
+	          w = boundingW
+	          h = boundingH
+	          break
+	        case 90:
+	        case 270:
+	          w = boundingH
+	          h = boundingW
+	          break
+	        }
+
+	        var ratio = w / h
+
+	        if (realRatio > ratio) {
+	          // covers the area horizontally
+	          h = Math.floor(w / realRatio)
+	        }
+	        else {
+	          w = Math.floor(h * realRatio)
+	        }
+
+	        return {
+	          width: w
+	        , height: h
+	        }
+	      }
+	    }
+	  }
+
+	  return scalingService
+	}
+
+
+/***/ },
+/* 71 */
+/***/ function(module, exports, __webpack_require__) {
+
+	angular.module('debug', [
+	    __webpack_require__(72).name,
+	])
+
+	module.exports.name = 'debug'
+
+
+
+
+/***/ },
+/* 72 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(3)
+	angular.module('debugCanvas', [
+	  'ngRoute'
+	])
+	.factory('colorBlack', function(){
+	    return {
+	        index: 0,
+	        table: ['#000000','#272727','#3C3C3C','#4F4F4F','#5B5B5B','#6C6C6C','#7B7B7B','#8E8E8E','#9D9D9D','#ADADAD','#BEBEBE','#D0D0D0','#E0E0E0','#F0F0F0','#FCFCFC','#FFFFFF'],
+	        getNext : function(){
+	        if(this.index === this.table.length){
+	          this.index = 1;
+	        }
+	        var ret_color = this.table[this.index];
+	        this.index = this.index + 1;
+	        return ret_color;
+	      }
+	    }
+	})
+	.component('debugCanvas', {
+	    template : '<canvas></canvas>',
+	    controller : function($scope, $element, $attrs, colorBlack){
+	        var canvas = $element.find('canvas')[0];
+	        canvas.height = 800;
+	        canvas.width = 600;
+	        setInterval(function(){
+	            var ctx = canvas.getContext('2d');
+	            ctx.fillStyle = colorBlack.getNext()
+	            ctx.fillRect(0, 0, canvas.width, canvas.height);
+	        }, 100)
+	    }
+	})
+
+	module.exports.name = 'debugCanvas'
+	    
+
+/***/ },
+/* 73 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = angular.module('stf/control', [
+	  __webpack_require__(16).name/*,
+	  require('stf/transaction').name,
+	  require('stf/keycodes').name*/
+	])
+	  .factory('ControlService', __webpack_require__(74))
+
+
+/***/ },
+/* 74 */
+/***/ function(module, exports) {
+
+	module.exports = function ControlServiceFactory(
+	 /* $upload
+	,*/ $http
+	, socket
+	/*
+	, TransactionService
+	, $rootScope
+	, gettext
+	, KeycodesMapped
+	*/
+	) {
+	  var controlService = {
+	  }
+
+	  function ControlService(target, channel) {
+	    function sendOneWay(action, data) {
+	      socket.emit(action, channel, data)
+	    }
+	/*
+	    function sendTwoWay(action, data) {
+	      var tx = TransactionService.create(target)
+	      socket.emit(action, channel, tx.channel, data)
+	      return tx.promise
+	    }
+
+	    function keySender(type, fixedKey) {
+	      return function(key) {
+	        if (typeof key === 'string') {
+	          sendOneWay(type, {
+	            key: key
+	          })
+	        }
+	        else {
+	          var mapped = fixedKey || KeycodesMapped[key]
+	          if (mapped) {
+	            sendOneWay(type, {
+	              key: mapped
+	            })
+	          }
+	        }
+	      }
+	    }
+	*/
+	    this.screenStreamOpen = function(){
+	      sendOneWay('screen.stream.open')
+	    }
+	    this.screenStreamClose = function(){
+	      sendOneWay('screen.stream.close')
+	    }
+	    this.gestureStart = function(seq) {
+	      sendOneWay('input.gestureStart', {
+	        seq: seq
+	      })
+	    }
+
+	    this.gestureStop = function(seq) {
+	      sendOneWay('input.gestureStop', {
+	        seq: seq
+	      })
+	    }
+
+	    this.touchDown = function(seq, contact, x, y, pressure) {
+	      console.log('touchDown')
+	      sendOneWay('input.touchDown', {
+	        seq: seq
+	      , contact: contact
+	      , x: x
+	      , y: y
+	      , pressure: pressure
+	      })
+	    }
+
+	    this.touchMove = function(seq, contact, x, y, pressure) {
+	      console.log('touchMove')
+	      sendOneWay('input.touchMove', {
+	        seq: seq
+	      , contact: contact
+	      , x: x
+	      , y: y
+	      , pressure: pressure
+	      })
+	    }
+
+	    this.touchUp = function(seq, contact) {
+	      console.log('touchUp')
+	      sendOneWay('input.touchUp', {
+	        seq: seq
+	      , contact: contact
+	      })
+	    }
+
+	    this.touchCommit = function(seq) {
+	      console.log('touchCommit')
+	      sendOneWay('input.touchCommit', {
+	        seq: seq
+	      })
+	    }
+
+	    this.touchReset = function(seq) {
+	      sendOneWay('input.touchReset', {
+	        seq: seq
+	      })
+	    }
+	/*
+	    this.keyDown = keySender('input.keyDown')
+	    this.keyUp = keySender('input.keyUp')
+	    this.keyPress = keySender('input.keyPress')
+
+	    this.home = keySender('input.keyPress', 'home')
+	    this.menu = keySender('input.keyPress', 'menu')
+	    this.back = keySender('input.keyPress', 'back')
+
+	    this.type = function(text) {
+	      return sendOneWay('input.type', {
+	        text: text
+	      })
+	    }
+
+	    this.paste = function(text) {
+	      return sendTwoWay('clipboard.paste', {
+	        text: text
+	      })
+	    }
+
+	    this.copy = function() {
+	      return sendTwoWay('clipboard.copy')
+	    }
+
+	    //@TODO: Refactor this please
+	    var that = this
+	    this.getClipboardContent = function() {
+	      that.copy().then(function(result) {
+	        $rootScope.$apply(function() {
+	          if (result.success) {
+	            if (result.lastData) {
+	              that.clipboardContent = result.lastData
+	            } else {
+	              that.clipboardContent = gettext('No clipboard data')
+	            }
+	          } else {
+	            that.clipboardContent = gettext('Error while getting data')
+	          }
+	        })
+	      })
+	    }
+
+	    this.shell = function(command) {
+	      return sendTwoWay('shell.command', {
+	        command: command
+	      , timeout: 10000
+	      })
+	    }
+
+	    this.identify = function() {
+	      return sendTwoWay('device.identify')
+	    }
+
+	    this.install = function(options) {
+	      return sendTwoWay('device.install', options)
+	    }
+
+	    this.uninstall = function(pkg) {
+	      return sendTwoWay('device.uninstall', {
+	        packageName: pkg
+	      })
+	    }
+
+	    this.reboot = function() {
+	      return sendTwoWay('device.reboot')
+	    }
+
+	    this.rotate = function(rotation, lock) {
+	      return sendOneWay('display.rotate', {
+	        rotation: rotation,
+	        lock: lock
+	      })
+	    }
+
+	    this.testForward = function(forward) {
+	      return sendTwoWay('forward.test', {
+	        targetHost: forward.targetHost
+	      , targetPort: Number(forward.targetPort)
+	      })
+	    }
+
+	    this.createForward = function(forward) {
+	      return sendTwoWay('forward.create', {
+	        id: forward.id
+	      , devicePort: Number(forward.devicePort)
+	      , targetHost: forward.targetHost
+	      , targetPort: Number(forward.targetPort)
+	      })
+	    }
+
+	    this.removeForward = function(forward) {
+	      return sendTwoWay('forward.remove', {
+	        id: forward.id
+	      })
+	    }
+
+	    this.startLogcat = function(filters) {
+	      return sendTwoWay('logcat.start', {
+	        filters: filters
+	      })
+	    }
+
+	    this.stopLogcat = function() {
+	      return sendTwoWay('logcat.stop')
+	    }
+
+	    this.startRemoteConnect = function() {
+	      return sendTwoWay('connect.start')
+	    }
+
+	    this.stopRemoteConnect = function() {
+	      return sendTwoWay('connect.stop')
+	    }
+
+	    this.openBrowser = function(url, browser) {
+	      return sendTwoWay('browser.open', {
+	        url: url
+	      , browser: browser ? browser.id : null
+	      })
+	    }
+
+	    this.clearBrowser = function(browser) {
+	      return sendTwoWay('browser.clear', {
+	        browser: browser.id
+	      })
+	    }
+
+	    this.openStore = function() {
+	      return sendTwoWay('store.open')
+	    }
+
+	    this.screenshot = function() {
+	      return sendTwoWay('screen.capture')
+	    }
+
+	    this.fsretrieve = function(file) {
+	      return sendTwoWay('fs.retrieve', {
+	        file: file
+	      })
+	    }
+
+	    this.fslist = function(dir) {
+	      return sendTwoWay('fs.list', {
+	        dir: dir
+	      })
+	    }
+
+	    this.checkAccount = function(type, account) {
+	      return sendTwoWay('account.check', {
+	        type: type
+	      , account: account
+	      })
+	    }
+
+	    this.removeAccount = function(type, account) {
+	      return sendTwoWay('account.remove', {
+	        type: type
+	      , account: account
+	      })
+	    }
+
+	    this.addAccountMenu = function() {
+	      return sendTwoWay('account.addmenu')
+	    }
+
+	    this.addAccount = function(user, password) {
+	      return sendTwoWay('account.add', {
+	        user: user
+	      , password: password
+	      })
+	    }
+
+	    this.getAccounts = function(type) {
+	      return sendTwoWay('account.get', {
+	        type: type
+	      })
+	    }
+
+	    this.getSdStatus = function() {
+	      return sendTwoWay('sd.status')
+	    }
+
+	    this.setRingerMode = function(mode) {
+	      return sendTwoWay('ringer.set', {
+	        mode: mode
+	      })
+	    }
+
+	    this.getRingerMode = function() {
+	      return sendTwoWay('ringer.get')
+	    }
+
+	    this.setWifiEnabled = function(enabled) {
+	      return sendTwoWay('wifi.set', {
+	        enabled: enabled
+	      })
+	    }
+
+	    this.getWifiStatus = function() {
+	      return sendTwoWay('wifi.get')
+	    }
+
+	    window.cc = this
+	    */
+	  }
+
+	  controlService.create = function(target, channel) {
+	    return new ControlService(target, channel)
+	  }
+
+	  return controlService
+	}
+
+
+/***/ },
+/* 75 */
 /***/ function(module, exports) {
 
 	module.exports = (function(){
 	    return {
 	    templateUrl:'./modules/phone-detail/template.html',
 	    //template: 'TBD: Detail view for <span>{{$ctrl.device.serial}}</span><br/><debug-canvas></debug-canvas>',
-	    controller: ['$scope', '$routeParams','DeviceService','IdentityService','socket',
-	      function PhoneDetailController($scope, $routeParams, DeviceService, IdentityService, socket) {
+	    controller: ['$scope', '$routeParams','DeviceService','IdentityService','ControlService',
+	      function PhoneDetailController($scope, $routeParams, DeviceService, IdentityService, ControlService) {
 	        /*
 	        this.device = {
 	          serial : $routeParams.phoneId,
@@ -61396,14 +62798,14 @@
 	          height : 1080
 	        }
 	        */
+	        this.control = ControlService.create(IdentityService.device, IdentityService.device.serial)
 	        this.device = IdentityService.device
 	        this.onOpenScreenStream = function(){
-	          socket.emit('screen.stream.open', this.device.serial, {})
+	          this.control.screenStreamOpen()
 	        }
 
 	        this.onCloseScreenStream = function(){
-	          socket.emit('screen.stream.close', this.device.serial, {})
-	          
+	          this.control.screenStreamClose()
 	        }
 	      }
 	    ]

@@ -10,7 +10,7 @@ module.exports = {
           './'
       ]
       , modulesDirectories: [
-        'modules'
+	'modules'
         , 'bower_components'
         , 'node_modules'
       ]

@@ -29,6 +29,26 @@ module.exports = function(options){
                 log.info('Trying to ' + word + ' screen stream on remote deivce')
                 dealer.send([deviceId, msgUtil.envelope(screenStreamMessage)])
             })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchMoveMessage, function(deviceId, touchMoveMessage){
+                //log.info('TouchDownMessage')
+                //console.log(deviceId)
+                //console.log(touchDownMessage)
+                dealer.send([deviceId, msgUtil.envelope(touchMoveMessage)])
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchUpMessage, function(deviceId, touchUpMessage){
+                //log.info('TouchDownMessage')
+                //console.log(deviceId)
+                //console.log(touchDownMessage)
+                dealer.send([deviceId, msgUtil.envelope(touchUpMessage)])
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchDownMessage, function(deviceId, touchDownMessage){
+                //log.info('TouchDownMessage')
+                dealer.send([deviceId, msgUtil.envelope(touchDownMessage)])
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.TouchCommitMessage, function(deviceId, touchCommitMessage){
+                //log.info('TouchCommitMessage')
+                dealer.send([deviceId, msgUtil.envelope(touchCommitMessage)])
+            })
             .generalHandler(deviceId, frontendEnvelop)
 
     }

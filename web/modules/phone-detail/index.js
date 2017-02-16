@@ -18,7 +18,8 @@ require('angular-route')
 angular.module('phoneDetail', [
   'ngRoute',
   require('./screen').name,
-  require('../debug').name
+  require('../debug').name,
+  require('../control').name
 ])
 .component('phoneDetail', require('./component.js'));
 //.controller('phoneDetailController', require('./controller.js'))
