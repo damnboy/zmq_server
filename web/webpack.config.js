@@ -1,9 +1,9 @@
 var webpack = require('webpack');
 module.exports = {
-  entry: './web/app.js',
+  entry: './app.js',
   output: {
     path: __dirname,
-    filename: './web/entry.js'
+    filename: './entry.js'
   }
   , resolve: {
       root: [

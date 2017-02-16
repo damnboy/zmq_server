@@ -1,0 +1,32 @@
+{
+  "name": "app",
+  "version": "1.0.0",
+  "description": "jeromq back-end",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "jeromq"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^2.11.0",
+    "chalk": "~1.1.1",
+    "commander": "^2.9.0",
+    "eventemitter3": "^1.2.0",
+    "lodash": "^4.14.2",
+    "my-local-ip": "^1.0.0",
+    "protobufjs": "^3.8.2",
+    "socket.io": "1.4.8",
+    "socket.io-client": "1.4.8",
+    "webpack": "^1.12.11",
+    "ws": "^1.0.1",
+    "yargs": "^6.5.0",
+    "zmq": "^2.14.0"
+  }
+}
