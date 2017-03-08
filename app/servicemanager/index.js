@@ -6,7 +6,7 @@ var EventEmitter = require("events").EventEmitter;
 var logger = require("../utils/logger")
 var lifecycle = require("../utils/lifecycle")
 
-
+var dbapi = require('../db/stf.js')
 module.exports = function(options){
     var log = logger.createLogger('['+ options.description + ']')
 
@@ -56,29 +56,68 @@ module.exports = function(options){
         }
 
         function onNetworkEnvelop(deviceid, networkenvelop){
+            
             messageRouter()
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage, function(deviceid, devideIntroductionMessage){
+                
                 //log.info('DeviceIntroductionMessage')
-                appdealer.send([deviceid, messageUtil.envelope(devideIntroductionMessage)])
+                dbapi.saveDeviceInitialState(devideIntroductionMessage.serial)
+                .then(function(state){
+                    var deviceRegisteredMessage = new messageDefines.com.example.ponytail.testjeromq.DeviceRegisteredMessage(devideIntroductionMessage.serial);
+                    devdealer.send(["provider", messageUtil.envelope(deviceRegisteredMessage)])
+                    appdealer.send(["provider", messageUtil.envelope(deviceRegisteredMessage)])
+                })
+                .catch(function(err){
+                    console.log(err)
+                })
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceIdentityMessage, function(deviceid, devideIdentityMessage){
+                log.info('DeviceIdentityMessage', deviceid.toString())
+                dbapi.saveDeviceIdentity(deviceid.toString(), devideIdentityMessage)
+                .then(function(){
+                    log.info("Update Device Identity successed")
+                    appdealer.send([deviceid, messageUtil.envelope(devideIdentityMessage)])
+                })
+                .catch(function(err){
+                    log.warn("Update Device Identity failed")
+                    log.warn(err)
+                })
+                
+            })
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage, function(deviceid, devideReadyMessage){
+                dbapi.setDeviceReady(devideReadyMessage.serial)
+                .then(function(){
+                    log.info("Update Device Ready flag successed")
+                    appdealer.send([deviceid, messageUtil.envelope(devideReadyMessage)])
+                })
+                .catch(function(){
+                    log.warn("Update Device Ready flag failed")
+                })
+                
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage, function(deviceid, devidePresentMessage){
                 //log.info('DevicePresentMessage')
-                appdealer.send([deviceid, messageUtil.envelope(devidePresentMessage)])
-            })
-            .on(messageDefines.com.example.ponytail.testjeromq.DeviceIdentityMessage, function(deviceid, devideIdentityMessage){
-                //log.info('DeviceIdentityMessage')
-                appdealer.send([deviceid, messageUtil.envelope(devideIdentityMessage)])
-            })
-            .on(messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage, function(deviceid, devideReadyMessage){
-                //log.info('DeviceReadyMessage')
-                appdealer.send([deviceid, messageUtil.envelope(devideReadyMessage)])
+                dbapi.setDevicePresent(devidePresentMessage.serial)
+                .then(function(){
+                    appdealer.send([deviceid, messageUtil.envelope(devidePresentMessage)])
+                })
+                .catch(function(err){
+                    log.info(err)
+                })
+                
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage, function(deviceid, devideAbsentMessage){
-                //log.info('DeviceAbsentMessage')
-                //前段，提示设备离线
-                appdealer.send([deviceid, messageUtil.envelope(devideAbsentMessage)])
-                //后端，进程销毁
+                dbapi.setDeviceAbsent(devideAbsentMessage.serial)
+                .then(function(){
+                    //前段，提示设备离线
+                    appdealer.send([deviceid, messageUtil.envelope(devideAbsentMessage)])
+                    //后端，进程销毁
                 devdealer.send([deviceid, messageUtil.envelope(devideAbsentMessage)])
+                })
+                .catch(function(err){
+                    log.info(err)
+                })
+                
 
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceHeartbeatMessage, function(deviceid, devideHeartbeatMessage){

@@ -75,13 +75,13 @@ NetworkDevicesTracker.prototype.startTracking = function(options){
             var device = _.assign({}, {id : deviceId.toString()})
 
             messageRouter()
-            .on(messageDefines.com.example.ponytail.testjeromq.LoginMessage, function(deviceid, loginMessage, sessionId){
-                _this.emit("login", device, sessionId);
-                _this.emit("registed", device, sessionId);
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceOnlineMessage, function(deviceid, loginMessage, sessionId){
+                _this.emit("online", device, sessionId);
+                //_this.emit("registed", device, sessionId);
 
             })
-            .on(messageDefines.com.example.ponytail.testjeromq.LogoffMessage, function(deviceId, logoffMessage, sessionId){
-                _this.emit("logoff", device, sessionId);
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceOfflineMessage, function(deviceId, logoffMessage, sessionId){
+                _this.emit("offline", device, sessionId);
                 /*
                 _this.replySuccess(deviceId, 
                     messageDefines.com.example.ponytail.testjeromq.MessageTypes.Name.TestConnectionMessage,

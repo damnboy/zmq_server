@@ -28,7 +28,7 @@ module.exports = function(options){
 
     var sub = zmq.socket("sub")
     log.info('Subscribing input from "%s"', options.endpoints.pub)
-    sub.subscribe("")
+    sub.subscribe("provider")
     sub.connect(options.endpoints.pub)
 
     var deviceInstances = {}
@@ -50,36 +50,40 @@ module.exports = function(options){
     })
     .then(function(){
         log.info("start tracking devices " + cliutil.buildUriArray(inetAddrs, 10000))
-
+/*
         tracker.on("registed", function(device, sessionId){
+            
             if(undefined != deviceInstances[device.id]){
                 deviceInstances[device.id].send({
                     message: 'relogin',
                     sessionId: sessionId
                 })
             }else{
+                log.info(device.id)
                 proxyTracker.emit(device.id, "registed")
             }
             
         })
+*/
+        tracker.on("online", function(device, sessionId){
 
-        tracker.on("login", function(device, sessionId){
-
-            push.send([device.id, msgUtil.envelope(
-                new messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage(device.id)
-            )])
             
             //检查进程是否存在
             if(undefined !== deviceInstances[device.id]){
                 log.info("detect relogin device: " + device.id)
             }
             else{   
+
                 log.info("detect login device: " + device.id)
                 var privateTracker = new EventEmitter()
                 function proxyTrackerListener(event){
                     privateTracker.emit(event)
                 }
                 proxyTracker.on(device.id, proxyTrackerListener)
+
+                push.send([device.id, msgUtil.envelope(
+                    new messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage(device.id)
+                )])
 
                 function forkDeviceInstance(){
                     var allocatedPorts = ports.splice(0, 4);
@@ -119,15 +123,17 @@ module.exports = function(options){
                             log.info("device instance[" + device.id + "] is ready")
                             log.info("device instance[" + device.id + "] open control service at: " + message.dealer)
 
+                            /*
                             //向前端发送设备上线消息
                             push.send([device.id, msgUtil.envelope(
                                 new messageDefines.com.example.ponytail.testjeromq.DevicePresentMessage(device.id)
                             )])
+                            */
 
                             //向后端发送注册信息
                             tracker.reply(device.id, 
                                 msgUtil.transaction(message.sessionId).success(
-                                    new messageDefines.com.example.ponytail.testjeromq.DeviceRegisteredMessage(device.id, message.dealer)))
+                                    new messageDefines.com.example.ponytail.testjeromq.DeviceInstanceCreated(message.dealer)))
 
                         }
                     })
@@ -178,11 +184,22 @@ module.exports = function(options){
 
         })
 
-        tracker.on("logoff", function(device, sessionId){
+        tracker.on("offline", function(device, sessionId){
             log.info("detect logoff device: " + device.id)
             proxyTracker.emit(device.id, "unregisted")
         })
 
+        sub.on('message', function(deviceId, networkEnvelop){
+            messageRouter()
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceRegisteredMessage, function(deviceId, deviceRegisteredMessage){
+                proxyTracker.emit(deviceRegisteredMessage.serial, 'registed')
+            })
+            /*
+            .on(messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage, function(deviceId, deviceAbsentMessage){
+                proxyTracker.emit(deviceAbsentMessage.serial, 'unregisted')
+            })*/
+            .generalHandler(deviceId, networkEnvelop)
+        })
     })
     .catch(function(error){
         log.error(error);

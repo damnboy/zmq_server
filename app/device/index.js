@@ -100,7 +100,7 @@ module.exports = function(options){
                 //转发心跳包
                 .on(messageDefines.com.example.ponytail.testjeromq.DeviceHeartbeatMessage, function(deviceId, heartBeatMessage){
                     //DeviceReadyMessage
-                    log.info('DeviceHeartbeatMessage')
+                    //log.info('DeviceHeartbeatMessage')
                     push.send([device.id, msgUtil.envelope(heartBeatMessage)])
                 })
                 .on(messageDefines.com.example.ponytail.testjeromq.ScreenControlMessage, function(deviceId, screenControlMessage){
@@ -119,16 +119,20 @@ module.exports = function(options){
                         DeviceIdentityMessage
                             DeviceDisplayMessage(url)
                             DevicePhoneMessage
+
+                        将视频信息存入特定的结构体内
                     */
                     identityMessage.display.url = ('ws://' + inetAddr + ':' + options.screenPort)
                     push.send([device.id, msgUtil.envelope(identityMessage)])
 
-                    //DeviceReadyMessage
-                    push.send([device.id, msgUtil.envelope(
-                        new messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage(device.id, device.id)
-                    )])
+                })
+                .on(messageDefines.com.example.ponytail.testjeromq.DeviceReadyMessage, function(deviceId, deviceReadyMessage){
 
-                    //当前进程状态信息
+                    //DeviceReadyMessage
+                    log.info('DeviceReadyMessage');
+                    push.send([device.id, msgUtil.envelope(deviceReadyMessage)])
+                    dealer.send([device.id, msgUtil.envelope(new messageDefines.com.example.ponytail.testjeromq.DeviceProbeMessage())])
+
                 })
                 .on(messageDefines.com.example.ponytail.testjeromq.ScreenFrameMessage, function(deviceId, screenFrameMessage){
                     //log.info('ScreenFrameMessage')

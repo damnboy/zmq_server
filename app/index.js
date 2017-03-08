@@ -34,10 +34,14 @@ argv
 })
 .argv
 
+
 function launch(argv){
     var procs = [
-
 			procutil.fork('./cli',[
+				'webservice', 'WEBSERVICE'
+			])
+			
+			,procutil.fork('./cli',[
 				'triproxy', 
 				,'--description', 'TRIPROXY FOR DEVICES'
 				,'--bind-pub',argv.bindDevPub
@@ -55,13 +59,13 @@ function launch(argv){
 				'servicemanager', 
 				,'--connect-dev-dealer',argv.bindDevDealer
 				,'--connect-app-dealer',argv.bindAppDealer
-			])/*
+			])
 			,procutil.fork('./cli',[
           'heartbeat' 
 					,'--heartbeat-timeout', 10000
           ,'--connect-push', argv.bindDevPull
           ,'--connect-sub', argv.bindAppPub
-      ])*/
+      ])
 			,procutil.fork('./cli',[
           'websocketserver' 
 					,'--port', 7110
@@ -69,11 +73,12 @@ function launch(argv){
           ,'--connect-sub', argv.bindAppPub
       ])
 			,procutil.fork('./cli',[
-          'devicemanager', 'devicemanager'
-          ,'--interface', 'en0'
+          'devicemanager', 'DEVICE MANAGER'
+          ,'--interface', 'en5'
           ,'--connect-push', argv.bindDevPull
           ,'--connect-sub', argv.bindDevPub
       ])
+			
     ]
     Promise.all(procs)
     .then(function(){
@@ -87,7 +92,16 @@ function launch(argv){
     })
 }
 
-launch(argv.argv)
+var dbSetup = require('./db/setup.js')()
+dbSetup
+.then(function(){
+	launch(argv.argv)
+})
+.catch(function(err){
+	console.log('Database setup with error: ')
+	console.log(err)
+})
+
 	/*
 require("./triproxy")({
 	endpoints : {

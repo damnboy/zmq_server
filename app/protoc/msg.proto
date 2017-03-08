@@ -9,9 +9,17 @@ message MessageTypes {
       NetworkEnvelope           = 1;
       TransactionDoneMessage    = 2;
 
+      DeviceOnlineMessage       = 10;
+      DeviceOfflineMessage      = 11;
+      DeviceInstanceCreated       = 12;
+      DeviceInstanceDestoried     = 13;
+      DeviceProbeMessage = 14;
+
+
       TestConnectionMessage     = 100;
-      LoginMessage              = 112;
-      LogoffMessage             = 113;
+      DeviceLoginMessage        = 112;
+      DeviceLogoffMessage       = 113;
+
       DeviceIntroductionMessage  = 114;
       DeviceRegisteredMessage    = 115;
       DeviceReadyMessage         = 116;
@@ -38,6 +46,23 @@ message MessageTypes {
   }  
 }
 
+message DeviceOnlineMessage{
+  required string key = 1;
+}
+
+message DeviceOfflineMessage{
+  required string key = 1;
+}
+
+message DeviceInstanceCreated{
+  required string uri = 1;
+}
+
+message DeviceInstanceDestoried{
+  required string uri = 1;
+}
+message DeviceProbeMessage {
+}
 message NetworkEnvelope{
   required MessageTypes.Name type = 1;
   required bytes message = 2;
@@ -66,7 +91,7 @@ message DeviceAbsentMessage {
 }
 message DeviceRegisteredMessage {
   required string serial = 1;
-  required string uri = 2;
+  //required string uri = 2;
 }
 
 message DevicePresentMessage {
@@ -75,17 +100,17 @@ message DevicePresentMessage {
 
 message DeviceReadyMessage {
   required string serial = 1;
-  required string channel = 2;
+  //required string channel = 2;
 }
 
-message LoginMessage{
+message DeviceLoginMessage{
   required string username = 1;
   required string password = 2;
   required string mail = 3;
   required string option = 4;
 }
 
-message LogoffMessage{
+message DeviceLogoffMessage{
   required string token = 1;
 }
 

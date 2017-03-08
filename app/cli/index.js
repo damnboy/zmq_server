@@ -8,6 +8,7 @@ argv
 .command(require('./servicemanager'))
 .command(require('./heartbeat'))
 .command(require('./websocketserver'))
+.command(require('./webservice'))
 .command(require('./device'))
 .help()
 .argv

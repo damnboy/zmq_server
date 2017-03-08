@@ -30,6 +30,7 @@ var EventEmitter = require("events").EventEmitter;
 var Promise = require("bluebird")
 var zmq = require("zmq");
 var _ = require("lodash")
+var stf = require('../db/stf.js')
 var messageDefines = require("../protoc/msgdef.js")
 var messageRouter = require("../protoc/msgrouter.js")
 var messageUtil = require("../protoc/msgutil.js")
@@ -66,16 +67,16 @@ module.exports = function(options){
     sub.subscribe('');
     sub.connect(options.endpoints.sub);
     sub.on('message', function(deviceId, networkEnvelopMessage){
+        //log.info('message')
         deviceId = deviceId.toString()
         messageRouter()
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceIntroductionMessage, function(deviceId, message) {
-                log.info('DeviceIntroductionMessage')
+                //log.info('DeviceIntroductionMessage')
                 ttlset.drop(deviceId, TtlSet.SILENT)
                 ttlset.bump(deviceId, Date.now())
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceHeartbeatMessage, function(deviceId, message) {
-                log.info('DeviceHeartbeatMessage')
-
+                //log.info('DeviceHeartbeatMessage')
                 ttlset.bump(deviceId, Date.now())
             })
             .on(messageDefines.com.example.ponytail.testjeromq.DeviceAbsentMessage, function(deviceId, message) {
@@ -101,5 +102,19 @@ module.exports = function(options){
             }
             log.info('closing ttlset')
             ttlset.stop()
+    })
+
+
+    stf.getPresentDevices()
+    .then(function(cursor){
+        return cursor.toArray()
+    })
+    .then(function(devices){
+        devices.forEach(function(device){
+            ttlset.bump(device.serial, device.presentAt, TtlSet.SILENT)
+        })
+    })
+    .catch(function(err){
+        log.warn(err)
     })
 }
